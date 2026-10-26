@@ -194,7 +194,16 @@ function status(txt, erro) { const s = $('#status'); s.textContent = txt; s.clas
 function atualizarAvisoOffline() { $('#aviso-offline').hidden = navigator.onLine; }
 window.addEventListener('online', sincronizar);
 window.addEventListener('offline', () => { atualizarAvisoOffline(); status('guardado no aparelho'); });
+// Ao sair, minimizar ou trocar de app: envia na hora o que estiver pendente
+// (se não der tempo, a fila continua no aparelho e vai na próxima abertura)
+function enviarPendentes() {
+  if (!estado.user || !Object.keys(fila).length) return;
+  clearTimeout(timerSync);
+  sincronizar();
+}
+window.addEventListener('pagehide', enviarPendentes);
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') enviarPendentes();
   // Ao voltar para o app, busca o que foi lançado no outro aparelho
   if (document.visibilityState === 'visible' && estado.user && navigator.onLine) {
     estado.dia = estado.dia || C.hoje();
@@ -339,14 +348,29 @@ function renderHoje(trocouDia) {
 }
 
 // Grava um valor de meta no dia selecionado
-function gravarEntrada(meta, mudancas) {
+// redesenhar = false enquanto o usuário digita (para não perder o foco do campo)
+function gravarEntrada(meta, mudancas, redesenhar = true) {
   const k = meta.id + '|' + estado.dia;
   const atual = estado.mapa[k] || { goal_id: meta.id, day: estado.dia, num_value: null, bool_value: null, feeling: null };
   const linha = { goal_id: meta.id, day: estado.dia, num_value: atual.num_value, bool_value: atual.bool_value, feeling: atual.feeling, ...mudancas };
   estado.mapa[k] = linha;
   enfileirar('entries', k, linha);
-  renderHoje(false);
+  if (redesenhar) renderHoje(false);
 }
+
+// Número digitado no campo: lê o texto (aceita vírgula) e devolve número ou null
+function lerNumero(el) {
+  const t = el.value.replace(',', '.').trim();
+  return t === '' || isNaN(Number(t)) ? null : Math.max(0, Number(t));
+}
+
+// Salva a cada tecla (grava na fila local na hora); o redesenho fica para quando sair do campo
+$('#cards').addEventListener('input', ev => {
+  const el = ev.target;
+  if (el.dataset.acao !== 'digitar') return;
+  const meta = estado.metas.find(m => m.id === el.closest('.card').dataset.id);
+  gravarEntrada(meta, { num_value: lerNumero(el) }, false);
+});
 
 // Cliques nos cards (delegação de eventos)
 $('#cards').addEventListener('click', ev => {
@@ -367,27 +391,19 @@ $('#cards').addEventListener('click', ev => {
 $('#cards').addEventListener('change', ev => {
   const el = ev.target;
   const meta = estado.metas.find(m => m.id === el.closest('.card').dataset.id);
-  if (el.dataset.acao === 'digitar') {
-    const t = el.value.replace(',', '.').trim();
-    gravarEntrada(meta, { num_value: t === '' ? null : Math.max(0, Number(t)) });
-  }
+  if (el.dataset.acao === 'digitar') gravarEntrada(meta, { num_value: lerNumero(el) });
   if (el.dataset.acao === 'sentimento') gravarEntrada(meta, { feeling: el.value || null });
 });
 
-// OBS: salva enquanto digita (com pequena espera)
-let timerObs = null;
+// OBS: cada tecla já vai para a fila local; o envio ao banco espera uma pausa na digitação
 $('#obs').addEventListener('input', () => {
   const dia = estado.dia, texto = $('#obs').value;
   estado.notas[dia] = texto;
-  status('digitando…');
-  clearTimeout(timerObs);
-  timerObs = setTimeout(() => enfileirar('day_notes', dia, { day: dia, obs: texto }), 800);
+  enfileirar('day_notes', dia, { day: dia, obs: texto });
 });
 
 // Setas de dia
 function irPara(d) {
-  // Garante que a OBS pendente do dia anterior seja enfileirada antes de trocar
-  if (timerObs) { clearTimeout(timerObs); timerObs = null; enfileirar('day_notes', estado.dia, { day: estado.dia, obs: $('#obs').value }); }
   estado.dia = d; renderHoje(true);
 }
 $('#dia-ant').onclick = () => irPara(C.somaDias(estado.dia, -1));

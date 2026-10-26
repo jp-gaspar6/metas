@@ -1,9 +1,9 @@
+﻿// =====================================================================
+// sw.js â€” service worker: guarda os arquivos do app para abrir sem
+// internet. Os DADOS nÃ£o passam por aqui (ficam no Supabase + fila local).
+// Ao mudar qualquer arquivo do app, aumente a VERSAO para forÃ§ar atualizaÃ§Ã£o.
 // =====================================================================
-// sw.js — service worker: guarda os arquivos do app para abrir sem
-// internet. Os DADOS não passam por aqui (ficam no Supabase + fila local).
-// Ao mudar qualquer arquivo do app, aumente a VERSAO para forçar atualização.
-// =====================================================================
-const VERSAO = 'metas-v2';
+const VERSAO = 'metas-v3';
 const ARQUIVOS = [
   './', 'index.html', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',
@@ -16,7 +16,7 @@ self.addEventListener('install', ev => {
   ev.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
 });
 
-// Apaga caches de versões antigas
+// Apaga caches de versÃµes antigas
 self.addEventListener('activate', ev => {
   ev.waitUntil(caches.keys()
     .then(chaves => Promise.all(chaves.filter(k => k !== VERSAO).map(k => caches.delete(k))))
@@ -30,7 +30,7 @@ self.addEventListener('fetch', ev => {
   // Supabase (API de dados e login) nunca vem do cache
   if (url.hostname.endsWith('supabase.co')) return;
 
-  // Arquivos do app: rede primeiro (pega a versão nova), cache se estiver offline
+  // Arquivos do app: rede primeiro (pega a versÃ£o nova), cache se estiver offline
   if (url.origin === location.origin) {
     ev.respondWith(
       fetch(req).then(resp => {
@@ -41,6 +41,6 @@ self.addEventListener('fetch', ev => {
     );
     return;
   }
-  // Bibliotecas do CDN têm versão fixa: cache primeiro
+  // Bibliotecas do CDN tÃªm versÃ£o fixa: cache primeiro
   ev.respondWith(caches.match(req).then(r => r || fetch(req)));
 });
