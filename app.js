@@ -100,9 +100,11 @@ async function carregar() {
 // Primeiro login: cria metas padrão, lista de sentimentos e importa os dados iniciais
 async function semear() {
   status('preparando suas metas…');
-  const linhas = SEED.metas.map(({ csv, ...m }, i) => ({ ...m, sort_order: i, start_date: '2026-10-18' }));
-  const { data: metas, error } = await sb.from('goals').insert(linhas).select();
+  const linhas = SEED.metas.map(({ csv, ...m }, i) => ({ ...m, user_id: estado.user.id, sort_order: i, start_date: '2026-10-18' }));
+  // ignoreDuplicates + índice único: se duas abas semearem ao mesmo tempo, não duplica
+  const { error } = await sb.from('goals').upsert(linhas, { onConflict: 'user_id,name', ignoreDuplicates: true });
   if (error) { status('erro ao criar metas', true); console.error(error); return; }
+  const { data: metas } = await sb.from('goals').select('*');
   await sb.from('lists').upsert({ user_id: estado.user.id, key: 'sentimentos', items: SEED.sentimentos });
   const porCsv = {};
   SEED.metas.forEach(s => { porCsv[s.csv] = metas.find(m => m.name === s.name); });

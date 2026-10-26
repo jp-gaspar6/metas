@@ -25,6 +25,9 @@ create table if not exists goals (
   created_at    timestamptz not null default now()
 );
 
+-- Impede metas com o mesmo nome (evita importação duplicada no 1º login)
+create unique index if not exists goals_user_nome on goals (user_id, name);
+
 -- ---------- Valor de cada meta em cada dia ----------
 create table if not exists entries (
   user_id    uuid not null default auth.uid() references auth.users on delete cascade,
