@@ -1,1 +1,4 @@
 .claude/
+# Segredos locais (o app não usa, mas por precaução)
+.env
+.env.*

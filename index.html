@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="topo">
-    <h1>Metas</h1>
+    <h1>Metas do <span>Gaspar</span></h1>
     <span id="status" class="status"></span>
     <button id="btn-tema" class="icone" title="Tema claro/escuro">◐</button>
     <button id="btn-sair" class="icone" title="Sair" hidden>⎋</button>
@@ -22,6 +22,7 @@
   <main>
     <!-- Login por link mágico -->
     <section id="tela-login" class="tela" hidden>
+      <div class="login-logo">🎯</div>
       <h2>Entrar</h2>
       <p>Digite seu e-mail. Você vai receber um link para entrar, sem senha.</p>
       <form id="form-login">
@@ -33,7 +34,13 @@
 
     <!-- Hoje -->
     <section id="tela-hoje" class="tela" hidden>
-      <div id="semana-pct" class="semana-pct"></div>
+      <div class="hero">
+        <div class="hero-txt">
+          <span id="hero-sub" class="hero-sub"></span>
+          <span id="hero-msg" class="hero-msg"></span>
+        </div>
+        <div id="hero-anel" class="anel"><span id="hero-pct"></span></div>
+      </div>
       <nav class="dia-nav">
         <button id="dia-ant" class="seta" aria-label="Dia anterior">‹</button>
         <div class="dia-centro">
@@ -42,11 +49,19 @@
         </div>
         <button id="dia-prox" class="seta" aria-label="Próximo dia">›</button>
       </nav>
+      <div id="faixa-dias" class="faixa-dias"></div>
       <div id="cards" class="cards"></div>
       <label class="obs">
         <span>OBS do dia</span>
         <textarea id="obs" rows="4" placeholder="Anotações livres…"></textarea>
       </label>
+    </section>
+
+    <!-- Semana / Mês (mesma tela, agregação diferente) -->
+    <section id="tela-periodo" class="tela" hidden>
+      <h2 id="periodo-titulo"></h2>
+      <p class="dica">Períodos em andamento mostram o parcial (só dias até hoje).</p>
+      <div class="tabela-rolagem"><table id="tabela-periodo" class="tabela"></table></div>
     </section>
 
     <!-- Telas das próximas etapas -->
@@ -56,12 +71,12 @@
   </main>
 
   <nav id="abas" class="abas" hidden>
-    <button data-aba="hoje" class="ativa">Hoje</button>
-    <button data-aba="semana">Semana</button>
-    <button data-aba="mes">Mês</button>
-    <button data-aba="graficos">Gráficos</button>
-    <button data-aba="unhas">Unhas</button>
-    <button data-aba="config">Config.</button>
+    <button data-aba="hoje" class="ativa"><b>☀️</b>Hoje</button>
+    <button data-aba="semana"><b>📅</b>Semana</button>
+    <button data-aba="mes"><b>🗓️</b>Mês</button>
+    <button data-aba="graficos"><b>📈</b>Gráficos</button>
+    <button data-aba="unhas"><b>✋</b>Unhas</button>
+    <button data-aba="config"><b>⚙️</b>Ajustes</button>
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
