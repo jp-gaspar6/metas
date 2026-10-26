@@ -115,6 +115,45 @@
       <div class="painel"><h3>Dias roídos e anotações</h3><div id="unhas-lista" class="lista-dias"></div></div>
     </section>
 
+    <!-- Ajustes -->
+    <section id="tela-config" class="tela" hidden>
+      <h2>Ajustes</h2>
+
+      <div class="painel">
+        <div class="painel-topo"><h3>Metas</h3><button id="btn-nova-meta" class="btn-sec">+ Nova meta</button></div>
+        <p class="dica">Toque numa meta para editar. Arquivar esconde a meta sem apagar o histórico.</p>
+        <div id="lista-metas" class="lista-metas"></div>
+      </div>
+
+      <div class="painel">
+        <h3>Sentimentos (unhas)</h3>
+        <p class="dica">Um por linha.</p>
+        <textarea id="txt-sentimentos" rows="7"></textarea>
+        <button id="btn-salvar-sent" class="btn-sec">Salvar lista</button>
+      </div>
+
+      <div class="painel">
+        <h3>Dados</h3>
+        <div class="acoes">
+          <button id="btn-exportar" class="primario">⬇ Exportar para Excel</button>
+          <label class="btn-sec arquivo">⬆ Importar CSV<input id="arq-csv" type="file" accept=".csv,text/csv,text/plain" hidden></label>
+        </div>
+        <p class="dica">CSV separado por ";" com a coluna <b>data</b> (AAAA-MM-DD) e uma coluna por meta
+          (nome da meta, ex.: <code>leitura;frutas;agua;reflexao;organizacao;roi_unhas;sentimento;obs</code>).
+          Campo vazio não altera nada.</p>
+        <div id="previa-csv"></div>
+      </div>
+
+      <div class="painel">
+        <h3>Conta</h3>
+        <form id="form-troca-senha" class="acoes">
+          <input id="troca-senha" type="password" minlength="8" required placeholder="Nova senha (mín. 8)" autocomplete="new-password">
+          <button class="btn-sec">Alterar senha</button>
+        </form>
+        <p id="msg-conta" class="dica"></p>
+      </div>
+    </section>
+
     <!-- Telas das próximas etapas -->
     <section id="tela-breve" class="tela" hidden>
       <p class="dica">Esta tela chega nas próximas etapas.</p>
@@ -137,5 +176,7 @@
   <script src="seed.js"></script>
   <script src="app.js"></script>
   <script src="graficos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+  <script src="ajustes.js"></script>
 </body>
 </html>

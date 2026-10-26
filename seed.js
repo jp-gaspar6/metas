@@ -36,8 +36,8 @@
     for (const l of linhas) {
       const cols = l.split(';');
       const reg = {}; cab.forEach((c, i) => reg[c] = (cols[i] ?? '').trim());
-      // O campo obs pode conter ";" — junta o resto da linha
-      if (cab.includes('obs')) reg.obs = cols.slice(cab.indexOf('obs')).join(';').trim();
+      // Se obs é a última coluna, ela pode conter ";" — junta o resto da linha
+      if (cab[cab.length - 1] === 'obs') reg.obs = cols.slice(cab.length - 1).join(';').trim();
       const dia = reg.data;
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dia)) continue;
       for (const [col, meta] of Object.entries(metasPorCsv)) {

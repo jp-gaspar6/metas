@@ -121,7 +121,8 @@ async function carregar() {
     console.warn('Sem conexão com o banco, usando cópia local', e);
     dados = lerLocal(chave, { metas: [], entries: [], notas: [], listas: [] });
   }
-  estado.metas = dados.metas.filter(m => m.active).sort((a, b) => a.sort_order - b.sort_order);
+  estado.todas = dados.metas.slice().sort((a, b) => a.sort_order - b.sort_order);   // inclui arquivadas (Ajustes)
+  estado.metas = estado.todas.filter(m => m.active);
   estado.mapa = {}; for (const e of dados.entries) estado.mapa[e.goal_id + '|' + e.day] = e;
   estado.notas = {}; for (const n of dados.notas) estado.notas[n.day] = n.obs;
   estado.listas = {}; for (const l of dados.listas) estado.listas[l.key] = l.items;
@@ -206,7 +207,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------------------------------------------------------------------
 function mostrarTela(aba) {
   estado.aba = aba;
-  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'breve']) $('#tela-' + t).hidden = true;
+  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'config', 'breve']) $('#tela-' + t).hidden = true;
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
@@ -215,6 +216,7 @@ function mostrarTela(aba) {
   else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
   else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
   else if (aba === 'unhas') { $('#tela-unhas').hidden = false; renderUnhas(); }
+  else if (aba === 'config') { $('#tela-config').hidden = false; renderAjustes(); }
   else $('#tela-breve').hidden = false;
 }
 document.querySelectorAll('#abas button').forEach(b => b.onclick = () => mostrarTela(b.dataset.aba));
