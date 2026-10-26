@@ -2,6 +2,8 @@
 
 Rastreador de hábitos pessoais: HTML/CSS/JS puro + Supabase (banco e login) + Cloudflare Pages.
 
+**App publicado:** https://metas-gaspar.pages.dev
+
 ## Arquivos
 | arquivo | o que faz |
 |---|---|
@@ -58,7 +60,7 @@ Abra http://localhost:8000/teste.html. A semana 18/10–24/10 deve dar média de
 
 ## Publicação (Cloudflare Pages)
 O site é publicado automaticamente a cada `git push` na branch `main`.
-- Projeto no Cloudflare: Workers & Pages → `metas` → conectado a `jp-gaspar6/metas`.
+- Projeto no Cloudflare: Workers & Pages → `metas-gaspar` → conectado a `jp-gaspar6/metas`.
 - Configuração de build: *Framework preset* **None**, *Build command* vazio, *Output directory* `/`.
 - No Supabase (Authentication → URL Configuration) o endereço publicado precisa estar em
   *Site URL* e em *Redirect URLs* (`https://<endereço>/**`), senão o e-mail de senha não volta ao app.
