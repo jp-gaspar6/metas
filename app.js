@@ -27,25 +27,49 @@ $('#btn-tema').onclick = () => {
 };
 
 // ---------------------------------------------------------------------
-// Login por link mágico
+// Login com e-mail e senha
 // ---------------------------------------------------------------------
 $('#form-login').onsubmit = async ev => {
   ev.preventDefault();
-  const email = $('#email').value.trim();
-  $('#msg-login').textContent = 'Enviando…';
-  const { error } = await sb.auth.signInWithOtp({
-    email, options: { emailRedirectTo: location.origin + location.pathname }
+  $('#msg-login').textContent = 'Entrando…';
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('#email').value.trim(), password: $('#senha').value
   });
+  $('#msg-login').textContent = error ? 'E-mail ou senha incorretos.' : '';
+};
+
+// Envia o e-mail para definir/recuperar a senha (só funciona para conta existente)
+$('#btn-esqueci').onclick = async () => {
+  const email = $('#email').value.trim();
+  if (!email) { $('#msg-login').textContent = 'Digite seu e-mail acima primeiro.'; return; }
+  $('#msg-login').textContent = 'Enviando…';
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
   $('#msg-login').textContent = error
     ? 'Erro: ' + error.message
-    : 'Pronto! Abra o link que chegou no seu e-mail (neste mesmo aparelho).';
+    : 'Se o e-mail tiver conta, chegou um link para definir a senha. Abra-o neste aparelho.';
 };
+
+// Salva a senha nova (usuário chegou pelo link de recuperação)
+$('#form-senha').onsubmit = async ev => {
+  ev.preventDefault();
+  const nova = $('#senha-nova').value;
+  if (nova !== $('#senha-conf').value) { $('#msg-senha').textContent = 'As senhas não conferem.'; return; }
+  const { error } = await sb.auth.updateUser({ password: nova });
+  if (error) { $('#msg-senha').textContent = 'Erro: ' + error.message; return; }
+  $('#form-senha').reset();
+  modoSenha = false;
+  mostrarTela('hoje');
+};
+
 $('#btn-sair').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
-sb.auth.onAuthStateChange((_ev, sessao) => {
+let modoSenha = false;   // true enquanto o usuário define a senha pelo link do e-mail
+sb.auth.onAuthStateChange((ev, sessao) => {
   const u = sessao && sessao.user;
+  if (ev === 'PASSWORD_RECOVERY') modoSenha = true;
   if (u && (!estado.user || estado.user.id !== u.id)) entrar(u);
   else if (!u) mostrarTela('login');
+  if (modoSenha && u) mostrarTela('senha');
 });
 
 async function entrar(user) {
@@ -56,7 +80,7 @@ async function entrar(user) {
   status('carregando…');
   await carregar();
   if (navigator.onLine && !estado.metas.length) { await semear(); await carregar(); }
-  mostrarTela('hoje');
+  mostrarTela(modoSenha ? 'senha' : 'hoje');
   sincronizar();
 }
 
@@ -171,8 +195,9 @@ document.addEventListener('visibilitychange', () => {
 // ---------------------------------------------------------------------
 function mostrarTela(aba) {
   estado.aba = aba;
-  for (const t of ['login', 'hoje', 'periodo', 'breve']) $('#tela-' + t).hidden = true;
-  if (aba === 'login') { $('#tela-login').hidden = false; $('#abas').hidden = true; return; }
+  for (const t of ['login', 'senha', 'hoje', 'periodo', 'breve']) $('#tela-' + t).hidden = true;
+  if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
+  $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
   document.querySelector('main').classList.toggle('largo', aba === 'semana' || aba === 'mes');
   if (aba === 'hoje') { $('#tela-hoje').hidden = false; renderHoje(true); }

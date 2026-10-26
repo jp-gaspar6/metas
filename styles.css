@@ -153,6 +153,32 @@ main.largo { max-width: 1100px; }
 .tabela .det { display: block; font-size: 12px; color: var(--suave); margin-top: 2px; }
 .tabela .parcial { font-size: 11px; color: var(--primaria); display: block; font-weight: 600; }
 
+/* ---------- Gráficos e Unhas ---------- */
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; scrollbar-width: none; }
+.chips button { flex: none; border: 1.5px solid var(--borda); background: var(--cartao); border-radius: 99px; padding: 8px 14px; font-size: 14px; font-weight: 600; }
+.chips button.sel { background: var(--cor, var(--texto)); border-color: var(--cor, var(--texto)); color: var(--fundo); }
+.chips button[style*="--cor"].sel { color: #fff; }
+.segment { background: var(--cartao-2); border-radius: 99px; padding: 4px; gap: 2px; display: inline-flex; max-width: 100%; }
+.segment button { border: 0; background: none; padding: 6px 12px; }
+.segment.mini button { font-size: 12px; padding: 4px 10px; }
+.painel { background: var(--cartao); border-radius: var(--raio); padding: 14px; box-shadow: var(--sombra); margin-top: 12px; min-width: 0; }
+.painel h3 { margin: 0 0 8px; font-size: 15px; }
+.painel-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.painel-topo .chips { padding: 0; }
+.graf { position: relative; height: 230px; }
+.duas { display: grid; gap: 0 12px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 720px) { .duas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.kpi { background: var(--cartao); border-radius: 18px; padding: 12px; box-shadow: var(--sombra); text-align: center; }
+.kpi strong { display: block; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.kpi span { font-size: 12px; color: var(--suave); }
+.kpi.destaque { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; }
+.kpi.destaque span { color: rgba(255, 255, 255, .85); }
+.lista-dias { display: flex; flex-direction: column; gap: 10px; }
+.item-dia { border-left: 3px solid #ec4899; padding: 4px 0 4px 12px; }
+.item-dia .cab { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 700; font-size: 14px; }
+.item-dia p { margin: 4px 0 0; font-size: 14px; color: var(--suave); white-space: pre-wrap; }
+
 .verde { color: var(--verde); } .amarelo { color: var(--amarelo); } .vermelho { color: var(--vermelho); }
 .bg-verde { background: var(--verde-bg); } .bg-amarelo { background: var(--amarelo-bg); } .bg-vermelho { background: var(--vermelho-bg); }
 
