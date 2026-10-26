@@ -2,7 +2,17 @@
 // app.js — login, dados (com fila offline) e tela Hoje
 // =====================================================================
 const C = window.Calc;
-const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+// "Permanecer conectado": marcado guarda a sessão no aparelho (localStorage);
+// desmarcado guarda só até fechar o navegador (sessionStorage).
+function lembrarLogin() { try { return localStorage.getItem('lembrar') !== 'nao'; } catch { return true; } }
+const armazenamentoSessao = {
+  getItem: k => { try { return localStorage.getItem(k) ?? sessionStorage.getItem(k); } catch { return null; } },
+  setItem: (k, v) => { try { (lembrarLogin() ? localStorage : sessionStorage).setItem(k, v); } catch { /* sem armazenamento */ } },
+  removeItem: k => { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch { /* idem */ } }
+};
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+  auth: { storage: armazenamentoSessao, persistSession: true, autoRefreshToken: true }
+});
 const $ = s => document.querySelector(s);
 
 // Estado em memória. mapa: 'goalId|AAAA-MM-DD' → linha de entries
@@ -32,6 +42,7 @@ $('#btn-tema').onclick = () => {
 $('#form-login').onsubmit = async ev => {
   ev.preventDefault();
   $('#msg-login').textContent = 'Entrando…';
+  try { localStorage.setItem('lembrar', $('#lembrar').checked ? 'sim' : 'nao'); } catch { /* sem armazenamento */ }
   const { error } = await sb.auth.signInWithPassword({
     email: $('#email').value.trim(), password: $('#senha').value
   });
@@ -195,13 +206,15 @@ document.addEventListener('visibilitychange', () => {
 // ---------------------------------------------------------------------
 function mostrarTela(aba) {
   estado.aba = aba;
-  for (const t of ['login', 'senha', 'hoje', 'periodo', 'breve']) $('#tela-' + t).hidden = true;
+  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'breve']) $('#tela-' + t).hidden = true;
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
   document.querySelector('main').classList.toggle('largo', aba === 'semana' || aba === 'mes');
   if (aba === 'hoje') { $('#tela-hoje').hidden = false; renderHoje(true); }
   else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
+  else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
+  else if (aba === 'unhas') { $('#tela-unhas').hidden = false; renderUnhas(); }
   else $('#tela-breve').hidden = false;
 }
 document.querySelectorAll('#abas button').forEach(b => b.onclick = () => mostrarTela(b.dataset.aba));

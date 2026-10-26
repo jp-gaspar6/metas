@@ -11,8 +11,12 @@
   <header class="topo">
     <h1>Metas do <span>Gaspar</span></h1>
     <span id="status" class="status"></span>
-    <button id="btn-tema" class="icone" title="Tema claro/escuro">◐</button>
-    <button id="btn-sair" class="icone" title="Sair" hidden>⎋</button>
+    <button id="btn-tema" class="icone" title="Tema claro/escuro" aria-label="Tema claro/escuro">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button id="btn-sair" class="icone" title="Sair" aria-label="Sair" hidden>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+    </button>
   </header>
 
   <div id="aviso-offline" class="aviso" hidden>
@@ -27,6 +31,7 @@
       <form id="form-login">
         <input id="email" type="email" required placeholder="seu@email.com" autocomplete="username">
         <input id="senha" type="password" required placeholder="Senha" autocomplete="current-password">
+        <label class="lembrar"><input id="lembrar" type="checkbox" checked> Permanecer conectado</label>
         <button type="submit" class="primario">Entrar</button>
       </form>
       <button id="btn-esqueci" class="link">Definir ou recuperar a senha</button>
@@ -131,5 +136,6 @@
   <script src="calc.js"></script>
   <script src="seed.js"></script>
   <script src="app.js"></script>
+  <script src="graficos.js"></script>
 </body>
 </html>
