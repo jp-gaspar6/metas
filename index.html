@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>Metas do Gaspar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topo">
+    <h1>Metas</h1>
+    <span id="status" class="status"></span>
+    <button id="btn-tema" class="icone" title="Tema claro/escuro">◐</button>
+    <button id="btn-sair" class="icone" title="Sair" hidden>⎋</button>
+  </header>
+
+  <div id="aviso-offline" class="aviso" hidden>
+    Sem conexão. O que você digitar fica guardado no aparelho e sincroniza quando a internet voltar.
+  </div>
+
+  <main>
+    <!-- Login por link mágico -->
+    <section id="tela-login" class="tela" hidden>
+      <h2>Entrar</h2>
+      <p>Digite seu e-mail. Você vai receber um link para entrar, sem senha.</p>
+      <form id="form-login">
+        <input id="email" type="email" required placeholder="seu@email.com" autocomplete="email">
+        <button type="submit" class="primario">Enviar link</button>
+      </form>
+      <p id="msg-login" class="dica"></p>
+    </section>
+
+    <!-- Hoje -->
+    <section id="tela-hoje" class="tela" hidden>
+      <div id="semana-pct" class="semana-pct"></div>
+      <nav class="dia-nav">
+        <button id="dia-ant" class="seta" aria-label="Dia anterior">‹</button>
+        <div class="dia-centro">
+          <div id="dia-texto" class="dia-texto"></div>
+          <button id="dia-hoje" class="link" hidden>voltar para hoje</button>
+        </div>
+        <button id="dia-prox" class="seta" aria-label="Próximo dia">›</button>
+      </nav>
+      <div id="cards" class="cards"></div>
+      <label class="obs">
+        <span>OBS do dia</span>
+        <textarea id="obs" rows="4" placeholder="Anotações livres…"></textarea>
+      </label>
+    </section>
+
+    <!-- Telas das próximas etapas -->
+    <section id="tela-breve" class="tela" hidden>
+      <p class="dica">Esta tela chega nas próximas etapas.</p>
+    </section>
+  </main>
+
+  <nav id="abas" class="abas" hidden>
+    <button data-aba="hoje" class="ativa">Hoje</button>
+    <button data-aba="semana">Semana</button>
+    <button data-aba="mes">Mês</button>
+    <button data-aba="graficos">Gráficos</button>
+    <button data-aba="unhas">Unhas</button>
+    <button data-aba="config">Config.</button>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="calc.js"></script>
+  <script src="seed.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
