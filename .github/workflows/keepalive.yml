@@ -1,0 +1,22 @@
+# Evita que o Supabase (plano Free) pause o projeto por inatividade:
+# a cada 3 dias faz uma consulta leve à API. Usa a URL e a anon key públicas
+# que já estão em config.js (não precisa de secrets).
+name: Manter Supabase ativo
+
+on:
+  schedule:
+    - cron: '17 9 */3 * *'   # 06:17 em São Paulo, a cada 3 dias
+  workflow_dispatch:          # botão "Run workflow" para testar na mão
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consulta leve ao banco
+        run: |
+          URL=$(grep -o "https://[a-z0-9]*\.supabase\.co" config.js)
+          KEY=$(grep -o "eyJ[A-Za-z0-9._-]*" config.js)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/rest/v1/goals?select=id&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+          echo "Resposta do Supabase: $STATUS"
+          test "$STATUS" = "200"

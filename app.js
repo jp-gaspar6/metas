@@ -452,3 +452,8 @@ function renderPeriodo(tipo) {
 }
 
 atualizarAvisoOffline();
+
+// Service worker: permite instalar o app e abri-lo sem internet
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW não registrado', e)));
+}
