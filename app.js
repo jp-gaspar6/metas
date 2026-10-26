@@ -426,10 +426,138 @@ function totalMeta(meta, de, ate, hoje) {
   return C.listaDias(ini, fim).reduce((s, d) => s + C.valor(meta, estado.mapa, d), 0);
 }
 
+// Visão e filtros da aba Semana (guardados só em memória)
+const tabela = { visao: 'semanas', dias: 90, dows: [0, 1, 2, 3, 4, 5, 6] };
+
 function renderPeriodo(tipo) {
+  const naSemana = tipo === 'semana';
+  $('#periodo-visoes').hidden = !naSemana;
+  document.querySelectorAll('#periodo-visoes button').forEach(b => b.classList.toggle('sel', b.dataset.visao === tabela.visao));
+  const visao = naSemana ? tabela.visao : 'semanas';
+  $('#periodo-titulo').textContent = !naSemana ? 'Meses' : visao === 'semanas' ? 'Semanas (Dom–Sáb)'
+    : visao === 'diario' ? 'Dia a dia' : 'Por dia da semana';
+  renderFiltros(visao);
+  if (visao === 'diario') renderDiario();
+  else if (visao === 'dow') renderPorDiaSemana();
+  else renderResumoPeriodos(tipo);
+}
+
+// Filtros: período (Dia a dia e Por dia da semana) e dias da semana (só Dia a dia)
+function renderFiltros(visao) {
+  if (visao === 'semanas') { $('#periodo-filtros').innerHTML = ''; return; }
+  const per = [[30, '30 dias'], [90, '90 dias'], [365, '1 ano'], [0, 'Tudo']]
+    .map(([d, t]) => `<button data-fdias="${d}" class="${tabela.dias === d ? 'sel' : ''}">${t}</button>`).join('');
+  const dows = visao !== 'diario' ? '' : `<div class="dias-sel filtro-dows">${NOMES_DIAS.map((n, d) =>
+    `<button data-fdow="${d}" class="${tabela.dows.includes(d) ? 'sel' : ''}">${n}</button>`).join('')}</div>`;
+  $('#periodo-filtros').innerHTML = `<div class="chips segment">${per}</div>${dows}`;
+}
+
+$('#periodo-visoes').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-visao]');
+  if (b) { tabela.visao = b.dataset.visao; renderPeriodo('semana'); }
+});
+$('#periodo-filtros').addEventListener('click', ev => {
+  const p = ev.target.closest('[data-fdias]');
+  if (p) tabela.dias = Number(p.dataset.fdias);
+  const d = ev.target.closest('[data-fdow]');
+  if (d) {
+    const n = Number(d.dataset.fdow);
+    tabela.dows = tabela.dows.includes(n) ? tabela.dows.filter(x => x !== n) : tabela.dows.concat(n);
+  }
+  if (p || d) renderPeriodo('semana');
+});
+
+// Dias do período escolhido (até hoje, a partir do início da primeira meta)
+function diasDoFiltro() {
+  const hoje = C.hoje();
+  const inicio = estado.metas.reduce((m, g) => g.start_date < m ? g.start_date : m, hoje);
+  let de = tabela.dias ? C.somaDias(hoje, -(tabela.dias - 1)) : inicio;
+  if (de < inicio) de = inicio;
+  return C.listaDias(de, hoje);
+}
+
+// Situação de uma meta num dia: 'ok', 'falha', 'nao-conta' ou 'vazio' (sim/não sem resposta)
+function situacao(m, d) {
+  if (d < m.start_date || !m.weekdays.includes(C.diaSemana(d))) return 'nao-conta';
+  const v = C.valor(m, estado.mapa, d);
+  if (v == null) return 'vazio';
+  return C.cumpriu(m, v) ? 'ok' : 'falha';
+}
+
+// Texto do valor registrado (vazio = "—"; sim/não em branco mostra o padrão entre parênteses)
+function textoValor(m, d) {
+  const e = estado.mapa[m.id + '|' + d];
+  if (m.kind === 'numeric') return e && e.num_value != null ? num(Number(e.num_value)) : '—';
+  if (e && e.bool_value != null) return e.bool_value ? 'Sim' : 'Não';
+  return m.default_value == null ? '—' : `(${m.default_value ? 'Sim' : 'Não'})`;
+}
+
+// Tabela dia a dia: uma linha por dia, célula verde/vermelha conforme cumpriu
+function renderDiario() {
+  const metas = estado.metas;
+  const metaSent = metas.find(m => m.feeling_on != null);
+  const dias = diasDoFiltro().filter(d => tabela.dows.includes(C.diaSemana(d))).reverse();
+  $('#periodo-dica').textContent = `${dias.length} dias. Verde = cumpriu, vermelho = não cumpriu, cinza = a meta não conta nesse dia. Valor entre parênteses = padrão (dia em branco).`;
+
+  const cab = `<tr><th>Dia</th>${metas.map(m => `<th>${esc(m.name)}</th>`).join('')}<th>Metas</th><th class="col-obs">OBS</th></tr>`;
+  const linhas = dias.map(d => {
+    const celulas = metas.map(m => {
+      const s = situacao(m, d);
+      let txt = textoValor(m, d);
+      if (m === metaSent) { const f = (estado.mapa[m.id + '|' + d] || {}).feeling; if (f) txt += `<span class="det">${esc(f)}</span>`; }
+      return `<td class="cel-${s}">${txt}</td>`;
+    }).join('');
+    const contam = metas.filter(m => ['ok', 'falha'].includes(situacao(m, d)));
+    const ok = contam.filter(m => situacao(m, d) === 'ok').length;
+    const pct = contam.length ? ok / contam.length : null;
+    const obs = estado.notas[d] || '';
+    return `<tr><td><strong>${ddmm(d)}</strong><span class="det">${NOMES_DIAS[C.diaSemana(d)]}</span></td>${celulas}
+      <td><span class="pct bg-${C.cor(pct)} ${C.cor(pct)}">${contam.length ? `${ok}/${contam.length}` : '—'}</span></td>
+      <td class="col-obs" title="${esc(obs)}">${esc(obs)}</td></tr>`;
+  }).join('');
+
+  // Rodapé: média dos valores numéricos e % de dias cumpridos entre os dias mostrados
+  const rodape = metas.map(m => {
+    const contam = dias.filter(d => ['ok', 'falha'].includes(situacao(m, d)));
+    if (!contam.length) return '<td>—</td>';
+    const pct = contam.filter(d => situacao(m, d) === 'ok').length / contam.length;
+    const media = m.kind === 'numeric'
+      ? `<span class="det">média ${num(contam.reduce((s, d) => s + C.valor(m, estado.mapa, d), 0) / contam.length)}</span>` : '';
+    return `<td><span class="pct bg-${C.cor(pct)} ${C.cor(pct)}">${C.pctTexto(pct)}</span>${media}</td>`;
+  }).join('');
+  $('#tabela-periodo').innerHTML = `<thead>${cab}</thead><tbody>${linhas || `<tr><td colspan="${metas.length + 3}">Nenhum dia no filtro.</td></tr>`}</tbody>
+    <tfoot><tr><td><strong>Resumo</strong></td>${rodape}<td></td><td class="col-obs"></td></tr></tfoot>`;
+}
+
+// Comparação por dia da semana: % de dias cumpridos e média do valor em cada Dom..Sáb
+function renderPorDiaSemana() {
+  const metas = estado.metas;
+  const dias = diasDoFiltro();
+  $('#periodo-dica').textContent = 'Para cada dia da semana: % de dias em que cumpriu a meta e, nas numéricas, a média registrada. "—" = a meta não conta nesse dia.';
+  const cab = `<tr><th>Dia</th>${metas.map(m => `<th>${esc(m.name)}</th>`).join('')}<th>Média</th></tr>`;
+  const linhas = NOMES_DIAS.map((nome, dow) => {
+    const doDia = dias.filter(d => C.diaSemana(d) === dow);
+    const pcts = [];
+    const celulas = metas.map(m => {
+      const contam = doDia.filter(d => ['ok', 'falha'].includes(situacao(m, d)));
+      if (!contam.length) return '<td class="cel-nao-conta">—</td>';
+      const pct = contam.filter(d => situacao(m, d) === 'ok').length / contam.length;
+      pcts.push(pct);
+      const media = m.kind === 'numeric'
+        ? `${num(contam.reduce((s, d) => s + C.valor(m, estado.mapa, d), 0) / contam.length)} ${esc(m.unit || '')} · ` : '';
+      return `<td><span class="pct bg-${C.cor(pct)} ${C.cor(pct)}">${C.pctTexto(pct)}</span><span class="det">${media}${contam.length} dias</span></td>`;
+    }).join('');
+    const media = pcts.length ? pcts.reduce((a, b) => a + b, 0) / pcts.length : null;
+    return `<tr><td><strong>${nome}</strong><span class="det">${doDia.length} dias</span></td>${celulas}
+      <td>${media == null ? '—' : `<span class="pct bg-${C.cor(media)} ${C.cor(media)}">${C.pctTexto(media)}</span>`}</td></tr>`;
+  }).join('');
+  $('#tabela-periodo').innerHTML = `<thead>${cab}</thead><tbody>${linhas}</tbody>`;
+}
+
+function renderResumoPeriodos(tipo) {
   const hoje = C.hoje();
   const metas = estado.metas;
-  $('#periodo-titulo').textContent = tipo === 'semana' ? 'Semanas (Dom–Sáb)' : 'Meses';
+  $('#periodo-dica').textContent = 'Períodos em andamento mostram o parcial (só dias até hoje).';
 
   const cab = `<tr><th>${tipo === 'semana' ? 'Semana' : 'Mês'}</th>${metas.map(m => `<th>${m.name}</th>`).join('')}<th>Média</th></tr>`;
   const linhas = listaPeriodos(tipo).map(([de, ate]) => {

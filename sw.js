@@ -3,7 +3,7 @@
 // internet. Os DADOS não passam por aqui (ficam no Supabase + fila local).
 // Ao mudar qualquer arquivo do app, aumente a VERSAO para forçar atualização.
 // =====================================================================
-const VERSAO = 'metas-v1';
+const VERSAO = 'metas-v2';
 const ARQUIVOS = [
   './', 'index.html', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',

@@ -85,7 +85,14 @@
     <!-- Semana / Mês (mesma tela, agregação diferente) -->
     <section id="tela-periodo" class="tela" hidden>
       <h2 id="periodo-titulo"></h2>
-      <p class="dica">Períodos em andamento mostram o parcial (só dias até hoje).</p>
+      <!-- Só na aba Semana: escolhe entre resumo semanal, dia a dia e comparação por dia da semana -->
+      <div id="periodo-visoes" class="chips segment">
+        <button data-visao="semanas" class="sel">Semanas</button>
+        <button data-visao="diario">Dia a dia</button>
+        <button data-visao="dow">Por dia da semana</button>
+      </div>
+      <div id="periodo-filtros"></div>
+      <p id="periodo-dica" class="dica"></p>
       <div class="tabela-rolagem"><table id="tabela-periodo" class="tabela"></table></div>
     </section>
 
