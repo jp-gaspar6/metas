@@ -3,9 +3,9 @@
 // internet. Os DADOS nÃ£o passam por aqui (ficam no Supabase + fila local).
 // Ao mudar qualquer arquivo do app, aumente a VERSAO para forÃ§ar atualizaÃ§Ã£o.
 // =====================================================================
-const VERSAO = 'metas-v9';
+const VERSAO = 'metas-v10';
 const ARQUIVOS = [
-  './', 'index.html', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js',
+  './', 'index.html', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js', 'ideias.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',

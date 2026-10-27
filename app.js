@@ -120,9 +120,9 @@ async function carregar() {
   const chave = 'cache_' + estado.user.id;
   let dados;
   try {
-    const [metas, entries, notas, listas] = await Promise.all(
-      ['goals', 'entries', 'day_notes', 'lists'].map(buscarTudo));
-    dados = { metas, entries, notas, listas };
+    const [metas, entries, notas, listas, ideias] = await Promise.all(
+      ['goals', 'entries', 'day_notes', 'lists', 'ideas'].map(buscarTudo));
+    dados = { metas, entries, notas, listas, ideias };
     gravarLocal(chave, dados);
   } catch (e) {
     console.warn('Sem conexão com o banco, usando cópia local', e);
@@ -133,10 +133,12 @@ async function carregar() {
   estado.mapa = {}; for (const e of dados.entries) estado.mapa[e.goal_id + '|' + e.day] = e;
   estado.notas = {}; for (const n of dados.notas) estado.notas[n.day] = n.obs;
   estado.listas = {}; for (const l of dados.listas) estado.listas[l.key] = l.items;
+  estado.ideias = {}; for (const i of dados.ideias || []) estado.ideias[i.id] = i;
   // O que está na fila é mais novo que o banco: aplica por cima
   for (const [k, linha] of Object.entries(fila)) {
     if (k.startsWith('entries|')) estado.mapa[linha.goal_id + '|' + linha.day] = linha;
     if (k.startsWith('day_notes|')) estado.notas[linha.day] = linha.obs;
+    if (k.startsWith('ideas|')) estado.ideias[linha.id] = linha;
   }
 }
 
@@ -161,7 +163,7 @@ async function semear() {
 // Gravação: tudo passa pela fila local, que sincroniza com o banco.
 // Assim nada se perde se a internet cair no meio.
 // ---------------------------------------------------------------------
-const CONFLITO = { entries: 'user_id,goal_id,day', day_notes: 'user_id,day' };
+const CONFLITO = { entries: 'user_id,goal_id,day', day_notes: 'user_id,day', ideas: 'id' };
 
 function enfileirar(tabela, chave, linha) {
   if (estado.leitor) return;
@@ -224,7 +226,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------------------------------------------------------------------
 function mostrarTela(aba) {
   estado.aba = aba;
-  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'config', 'breve']) $('#tela-' + t).hidden = true;
+  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'ideias', 'config', 'breve']) $('#tela-' + t).hidden = true;
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
@@ -233,6 +235,7 @@ function mostrarTela(aba) {
   else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
   else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
   else if (aba === 'unhas') { $('#tela-unhas').hidden = false; renderUnhas(); }
+  else if (aba === 'ideias' && !estado.leitor) { $('#tela-ideias').hidden = false; renderIdeias(); }
   else if (aba === 'config' && !estado.leitor) { $('#tela-config').hidden = false; renderAjustes(); }
   else $('#tela-breve').hidden = false;
 }

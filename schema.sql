@@ -96,3 +96,15 @@ create policy "leitor" on lists for select to authenticated
 -- Para liberar alguém (depois de convidar em Authentication → Users → Invite user):
 -- insert into viewers (owner_id, viewer_id)
 --   select (select id from auth.users where email = 'DONO@email'), id from auth.users where email = 'LEITOR@email';
+
+-- Ideias: coisas para fazer um dia e de onde vieram (só o dono vê)
+create table if not exists ideas (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  text       text not null,
+  source     text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table ideas enable row level security;
+create policy "dono" on ideas for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());

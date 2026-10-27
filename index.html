@@ -145,6 +145,19 @@
       <div class="painel"><h3>Dias roídos e anotações</h3><div id="unhas-lista" class="lista-dias"></div></div>
     </section>
 
+    <!-- Ideias: coisas para fazer um dia e de onde vieram -->
+    <section id="tela-ideias" class="tela" hidden>
+      <h2>Ideias</h2>
+      <form id="form-ideia" class="painel form-ideia">
+        <input id="ideia-texto" required placeholder="O que fazer, ver, pesquisar…" autocomplete="off">
+        <input id="ideia-fonte" list="fontes-ideia" placeholder="De onde veio? (ex.: psicólogo)" autocomplete="off">
+        <datalist id="fontes-ideia"></datalist>
+        <button type="submit" class="primario">Anotar</button>
+      </form>
+      <p id="ideias-vazio" class="dica">Nenhuma ideia anotada ainda.</p>
+      <div id="lista-ideias" class="lista-ideias"></div>
+    </section>
+
     <!-- Ajustes -->
     <section id="tela-config" class="tela" hidden>
       <h2>Ajustes</h2>
@@ -196,6 +209,7 @@
     <button data-aba="mes"><b>🗓️</b>Mês</button>
     <button data-aba="graficos"><b>📈</b>Gráficos</button>
     <button data-aba="unhas"><b>✋</b>Unhas</button>
+    <button data-aba="ideias"><b>💡</b>Ideias</button>
     <button data-aba="config"><b>⚙️</b>Ajustes</button>
   </nav>
 
@@ -208,5 +222,6 @@
   <script src="graficos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
   <script src="ajustes.js"></script>
+  <script src="ideias.js"></script>
 </body>
 </html>

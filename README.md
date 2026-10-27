@@ -12,6 +12,7 @@ Rastreador de hábitos pessoais: HTML/CSS/JS puro + Supabase (banco e login) + C
 | `app.js` | login, leitura/gravação, fila offline, telas Hoje/Semana/Mês |
 | `graficos.js` | telas Gráficos e Unhas (Chart.js) |
 | `ajustes.js` | tela Ajustes: metas, sentimentos, Excel, CSV, senha |
+| `ideias.js` | tela Ideias: anotar o que fazer um dia e de onde veio |
 | `sw.js` / `manifest.webmanifest` / `icones/` | PWA (instalar no celular, abrir offline) |
 | `.github/workflows/keepalive.yml` | consulta a cada 3 dias para o Supabase não pausar |
 | `calc.js` | datas no fuso de São Paulo e regras de % |
