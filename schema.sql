@@ -103,6 +103,7 @@ create table if not exists ideas (
   user_id    uuid not null default auth.uid() references auth.users on delete cascade,
   text       text not null,
   source     text,
+  done       boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
