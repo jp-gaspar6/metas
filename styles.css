@@ -250,3 +250,8 @@ code { font-size: 12px; background: var(--cartao-2); padding: 1px 4px; border-ra
 .abas button.ativa { color: var(--primaria); background: color-mix(in srgb, var(--primaria) 12%, transparent); font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Leitor (conta convidada): só vê; sem OBS, sem Ajustes, campos travados */
+body.leitor .obs, body.leitor #abas [data-aba="config"] { display: none; }
+body.leitor #cards { pointer-events: none; }
+body.leitor #cards input, body.leitor #cards select { opacity: 1; }

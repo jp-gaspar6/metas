@@ -74,7 +74,8 @@ $('#form-senha').onsubmit = async ev => {
 
 $('#btn-sair').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
-let modoSenha = false;   // true enquanto o usuário define a senha pelo link do e-mail
+// true enquanto o usuário define a senha pelo link do e-mail (recuperação ou convite)
+let modoSenha = /type=invite/.test(location.hash);
 sb.auth.onAuthStateChange((ev, sessao) => {
   const u = sessao && sessao.user;
   if (ev === 'PASSWORD_RECOVERY') modoSenha = true;
@@ -89,8 +90,14 @@ async function entrar(user) {
   $('#btn-sair').hidden = false;
   $('#abas').hidden = false;
   status('carregando…');
+  // Leitor: conta convidada que só vê os dados do dono (sem OBS, sem editar)
+  const { data: vinculo } = await sb.from('viewers').select('owner_id').eq('viewer_id', user.id).limit(1);
+  estado.leitor = !!(vinculo && vinculo.length);
+  document.body.classList.toggle('leitor', estado.leitor);
+  if (estado.leitor) fila = {};
   await carregar();
-  if (navigator.onLine && !estado.metas.length) { await semear(); await carregar(); }
+  if (navigator.onLine && !estado.metas.length && !estado.leitor) { await semear(); await carregar(); }
+  if (estado.leitor) status('só leitura');
   mostrarTela(modoSenha ? 'senha' : 'hoje');
   sincronizar();
 }
@@ -157,6 +164,7 @@ async function semear() {
 const CONFLITO = { entries: 'user_id,goal_id,day', day_notes: 'user_id,day' };
 
 function enfileirar(tabela, chave, linha) {
+  if (estado.leitor) return;
   fila[tabela + '|' + chave] = { ...linha, user_id: estado.user.id, updated_at: new Date().toISOString() };
   gravarLocal('fila_' + estado.user.id, fila);
   status(navigator.onLine ? 'salvando…' : 'guardado no aparelho');
@@ -166,7 +174,7 @@ function enfileirar(tabela, chave, linha) {
 
 async function sincronizar() {
   atualizarAvisoOffline();
-  if (sincronizando || !estado.user) return;
+  if (sincronizando || !estado.user || estado.leitor) return;
   if (!Object.keys(fila).length) { status('salvo'); return; }
   if (!navigator.onLine) { status('guardado no aparelho'); return; }
   sincronizando = true;
@@ -225,7 +233,7 @@ function mostrarTela(aba) {
   else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
   else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
   else if (aba === 'unhas') { $('#tela-unhas').hidden = false; renderUnhas(); }
-  else if (aba === 'config') { $('#tela-config').hidden = false; renderAjustes(); }
+  else if (aba === 'config' && !estado.leitor) { $('#tela-config').hidden = false; renderAjustes(); }
   else $('#tela-breve').hidden = false;
 }
 document.querySelectorAll('#abas button').forEach(b => b.onclick = () => mostrarTela(b.dataset.aba));

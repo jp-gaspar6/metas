@@ -72,3 +72,27 @@ create policy "dono" on goals     for all to authenticated using (user_id = auth
 create policy "dono" on entries   for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "dono" on day_notes for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "dono" on lists     for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- =====================================================================
+-- Leitores: contas que só VEEM os dados do dono (sem as OBS do dia).
+-- Nenhuma política de escrita para leitores; day_notes fica de fora.
+-- =====================================================================
+create table if not exists viewers (
+  owner_id  uuid not null references auth.users on delete cascade,
+  viewer_id uuid not null references auth.users on delete cascade,
+  primary key (owner_id, viewer_id)
+);
+alter table viewers enable row level security;
+create policy "ve o proprio vinculo" on viewers for select to authenticated
+  using (viewer_id = auth.uid() or owner_id = auth.uid());
+
+create policy "leitor" on goals for select to authenticated
+  using (exists (select 1 from viewers v where v.owner_id = goals.user_id and v.viewer_id = auth.uid()));
+create policy "leitor" on entries for select to authenticated
+  using (exists (select 1 from viewers v where v.owner_id = entries.user_id and v.viewer_id = auth.uid()));
+create policy "leitor" on lists for select to authenticated
+  using (exists (select 1 from viewers v where v.owner_id = lists.user_id and v.viewer_id = auth.uid()));
+
+-- Para liberar alguém (depois de convidar em Authentication → Users → Invite user):
+-- insert into viewers (owner_id, viewer_id)
+--   select (select id from auth.users where email = 'DONO@email'), id from auth.users where email = 'LEITOR@email';
