@@ -226,7 +226,7 @@ document.addEventListener('visibilitychange', () => {
 // ---------------------------------------------------------------------
 function mostrarTela(aba) {
   estado.aba = aba;
-  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'unhas', 'ideias', 'config', 'breve']) $('#tela-' + t).hidden = true;
+  for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'ideias', 'config', 'breve']) $('#tela-' + t).hidden = true;
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
@@ -234,7 +234,6 @@ function mostrarTela(aba) {
   if (aba === 'hoje') { $('#tela-hoje').hidden = false; renderHoje(true); }
   else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
   else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
-  else if (aba === 'unhas') { $('#tela-unhas').hidden = false; renderUnhas(); }
   else if (aba === 'ideias' && !estado.leitor) { $('#tela-ideias').hidden = false; renderIdeias(); }
   else if (aba === 'config' && !estado.leitor) { $('#tela-config').hidden = false; renderAjustes(); }
   else $('#tela-breve').hidden = false;

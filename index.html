@@ -124,11 +124,9 @@
       </div>
       <div class="painel"><h3>% por semana</h3><div class="graf"><canvas id="graf-semanal"></canvas></div></div>
       <div class="painel"><h3 id="graf-diario-tit">Valores diários</h3><div class="graf"><canvas id="graf-diario"></canvas></div></div>
-    </section>
 
-    <!-- Unhas -->
-    <section id="tela-unhas" class="tela" hidden>
-      <h2>Unhas</h2>
+      <!-- Extras da meta de unhas (aparecem quando ela está selecionada) -->
+      <div id="graf-unhas" hidden>
       <div id="unhas-kpis" class="kpis"></div>
       <div class="painel">
         <div class="painel-topo"><h3>Dias roídos</h3>
@@ -142,7 +140,8 @@
         <div class="painel"><h3>Por sentimento</h3><div class="graf"><canvas id="graf-unhas-sent"></canvas></div></div>
         <div class="painel"><h3>Por dia da semana</h3><div class="graf"><canvas id="graf-unhas-dow"></canvas></div></div>
       </div>
-      <div class="painel"><h3>Dias roídos e anotações</h3><div id="unhas-lista" class="lista-dias"></div></div>
+      <div class="painel"><h3 id="unhas-lista-tit">Dias roídos e anotações</h3><div id="unhas-lista" class="lista-dias"></div></div>
+      </div>
     </section>
 
     <!-- Ideias: coisas para fazer um dia e de onde vieram -->
@@ -208,7 +207,6 @@
     <button data-aba="semana"><b>📅</b>Semana</button>
     <button data-aba="mes"><b>🗓️</b>Mês</button>
     <button data-aba="graficos"><b>📈</b>Gráficos</button>
-    <button data-aba="unhas"><b>✋</b>Unhas</button>
     <button data-aba="ideias"><b>💡</b>Ideias</button>
     <button data-aba="config"><b>⚙️</b>Ajustes</button>
   </nav>

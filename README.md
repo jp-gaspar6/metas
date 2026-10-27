@@ -10,7 +10,7 @@ Rastreador de hábitos pessoais: HTML/CSS/JS puro + Supabase (banco e login) + C
 | `index.html` | estrutura das telas |
 | `styles.css` | visual (celular primeiro, tema claro/escuro) |
 | `app.js` | login, leitura/gravação, fila offline, telas Hoje/Semana/Mês |
-| `graficos.js` | telas Gráficos e Unhas (Chart.js) |
+| `graficos.js` | tela Gráficos, com os extras da meta de unhas (Chart.js) |
 | `ajustes.js` | tela Ajustes: metas, sentimentos, Excel, CSV, senha |
 | `ideias.js` | tela Ideias: anotar o que fazer um dia e de onde veio |
 | `sw.js` / `manifest.webmanifest` / `icones/` | PWA (instalar no celular, abrir offline) |

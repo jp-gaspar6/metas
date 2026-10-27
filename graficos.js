@@ -1,5 +1,5 @@
 // =====================================================================
-// graficos.js — telas Gráficos e Unhas (Chart.js)
+// graficos.js — tela Gráficos, com os extras da meta de unhas (Chart.js)
 // Usa o estado, o cálculo (C) e os auxiliares definidos em app.js.
 // =====================================================================
 const graf = { meta: 'media', dias: 30, agrupUnhas: 'semana' };
@@ -124,6 +124,11 @@ function renderGraficos() {
       }
     });
   }
+
+  // Meta de unhas selecionada: mostra também os gráficos e a lista específicos dela
+  const mu = metaUnhas();
+  $('#graf-unhas').hidden = !(meta && mu && meta.id === mu.id);
+  if (!$('#graf-unhas').hidden) renderUnhas();
 }
 
 $('#graf-metas').addEventListener('click', ev => {
@@ -136,7 +141,7 @@ $('#graf-periodo').addEventListener('click', ev => {
 });
 
 // ---------------------------------------------------------------------
-// Tela Unhas: a meta sim/não que tem campo Sentimento
+// Extras da meta de unhas (sim/não com campo Sentimento), dentro de Gráficos
 // ---------------------------------------------------------------------
 function metaUnhas() { return estado.metas.find(m => m.kind === 'boolean' && m.feeling_on != null); }
 
@@ -196,13 +201,14 @@ function renderUnhas() {
     options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } }
   });
 
-  // Lista dos dias roídos com sentimento e OBS (mais recente primeiro)
+  // Lista dos dias roídos com sentimento e OBS (mais recente primeiro); leitor não vê OBS
+  $('#unhas-lista-tit').textContent = estado.leitor ? 'Dias roídos' : 'Dias roídos e anotações';
   $('#unhas-lista').innerHTML = roidos.slice().reverse().map(d => {
     const e = estado.mapa[meta.id + '|' + d] || {};
-    const obs = estado.notas[d];
+    const obs = estado.leitor ? null : estado.notas[d];
     return `<div class="item-dia">
         <div class="cab">${fmtDia.format(C.paraData(d))}${e.feeling ? `<span class="chip">${esc(e.feeling)}</span>` : ''}</div>
-        ${obs ? `<p>${esc(obs)}</p>` : '<p><em>sem anotação</em></p>'}
+        ${estado.leitor ? '' : obs ? `<p>${esc(obs)}</p>` : '<p><em>sem anotação</em></p>'}
       </div>`;
   }).join('') || '<p class="dica">Nenhum dia roído registrado. 💪</p>';
 }
