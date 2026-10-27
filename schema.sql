@@ -109,3 +109,20 @@ create table if not exists ideas (
 );
 alter table ideas enable row level security;
 create policy "dono" on ideas for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Notas (estilo Google Keep): texto ou lista de caixinhas, cor, fixar, arquivar (só o dono vê)
+create table if not exists notes (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  kind       text not null default 'text' check (kind in ('text','list')),
+  title      text,
+  body       text,
+  items      jsonb not null default '[]',
+  color      text,
+  pinned     boolean not null default false,
+  archived   boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table notes enable row level security;
+create policy "dono" on notes for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
