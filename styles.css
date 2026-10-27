@@ -84,7 +84,7 @@ main.largo { max-width: 1100px; }
 
 /* ---------- Navegação de dias ---------- */
 .dia-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.seta { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--borda); background: var(--cartao); font-size: 22px; line-height: 1; }
+.seta { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--borda); background: var(--cartao); color: inherit; display: grid; place-items: center; padding: 0; }
 .seta:disabled { opacity: .3; cursor: default; }
 .dia-centro { flex: 1; text-align: center; }
 .dia-texto { font-weight: 700; text-transform: capitalize; }
