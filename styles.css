@@ -87,7 +87,24 @@ main.largo { max-width: 1100px; }
 .seta { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--borda); background: var(--cartao); color: inherit; display: grid; place-items: center; padding: 0; }
 .seta:disabled { opacity: .3; cursor: default; }
 .dia-centro { flex: 1; text-align: center; }
-.dia-texto { font-weight: 700; text-transform: capitalize; }
+.dia-texto { font-weight: 700; }
+.btn-cal { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: inherit; font: inherit; padding: 4px 8px; border-radius: 10px; cursor: pointer; }
+.btn-cal svg { color: var(--primaria); }
+.dia-sub { font-size: 13px; color: var(--suave); text-transform: capitalize; }
+.sobreposto { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 6, 30, .55); display: grid; place-items: center; padding: 16px; }
+.cal-caixa { background: var(--cartao); border-radius: var(--raio); box-shadow: var(--sombra); padding: 16px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+.cal-topo { display: flex; align-items: center; justify-content: space-between; }
+.cal-topo strong { display: inline-block; }
+.cal-topo strong::first-letter { text-transform: uppercase; }
+.cal-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.cal-sem { font-size: 11px; color: var(--suave); padding: 4px 0; }
+.cal-grade button { border: 0; background: none; color: inherit; font: inherit; border-radius: 12px; padding: 6px 0 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+.cal-grade button.semana { background: color-mix(in srgb, var(--primaria) 16%, transparent); }
+.cal-grade button.hoje { font-weight: 800; color: var(--primaria); }
+.cal-grade button.sel { background: var(--texto); color: var(--fundo); }
+.cal-grade button:disabled { opacity: .3; cursor: default; }
+.cal-grade .ponto { width: 6px; height: 6px; border-radius: 50%; background: var(--borda); }
+.cal-grade .ponto.verde { background: var(--verde); } .cal-grade .ponto.amarelo { background: var(--amarelo); } .cal-grade .ponto.vermelho { background: var(--vermelho); }
 
 .faixa-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 16px; }
 .faixa-dias button { border: 1px solid var(--borda); background: var(--cartao); border-radius: 16px; padding: 8px 0 6px;

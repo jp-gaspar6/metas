@@ -277,9 +277,12 @@ function renderHoje(trocouDia) {
   $('#hero-anel').style.setProperty('--p', r.media == null ? 0 : Math.round(r.media * 100));
 
   if (trocouDia) {
-    $('#dia-texto').textContent = fmtDia.format(C.paraData(d)) + (d === hoje ? ' · hoje' : '');
+    const iniS = C.inicioSemana(d);
+    $('#dia-texto').textContent = `Semana ${ddmm(iniS)}–${ddmm(C.somaDias(iniS, 6))}`;
+    $('#dia-sub').textContent = fmtDia.format(C.paraData(d)) + (d === hoje ? ' · hoje' : '');
     $('#dia-hoje').hidden = d === hoje;
-    $('#dia-prox').disabled = d >= hoje;
+    $('#dia-prox').disabled = C.somaDias(iniS, 7) > hoje;
+    $('#dia-ant').disabled = iniS <= primeiroDia();
     $('#obs').value = estado.notas[d] || '';
     okAntes = new Set();
   }
@@ -287,10 +290,7 @@ function renderHoje(trocouDia) {
   // Faixa com os 7 dias da semana do dia selecionado; o ponto mostra o % do dia
   const iniSel = C.inicioSemana(d);
   $('#faixa-dias').innerHTML = C.listaDias(iniSel, C.somaDias(iniSel, 6)).map(dia => {
-    const dow = C.diaSemana(dia);
-    const contam = metas.filter(m => m.weekdays.includes(dow) && dia >= m.start_date);
-    const ok = contam.filter(m => C.cumpriu(m, C.valor(m, estado.mapa, dia))).length;
-    const cor = dia > hoje || !contam.length ? '' : C.cor(ok / contam.length);
+    const dow = C.diaSemana(dia), cor = corDia(dia, hoje);
     return `<button data-dia="${dia}" class="${dia === d ? 'sel' : ''}" ${dia > hoje ? 'disabled' : ''}>
         <span class="sem">${NOMES_DIAS[dow]}</span><span class="num">${dia.slice(8, 10)}</span><span class="ponto ${cor}"></span>
       </button>`;
@@ -402,16 +402,73 @@ $('#obs').addEventListener('input', () => {
   enfileirar('day_notes', dia, { day: dia, obs: texto });
 });
 
-// Setas de dia
+// Cor do ponto de um dia: % das metas que contam naquele dia
+function corDia(dia, hoje) {
+  const dow = C.diaSemana(dia);
+  const contam = estado.metas.filter(m => m.weekdays.includes(dow) && dia >= m.start_date);
+  if (dia > hoje || !contam.length) return '';
+  return C.cor(contam.filter(m => C.cumpriu(m, C.valor(m, estado.mapa, dia))).length / contam.length);
+}
+// Início do histórico: a meta mais antiga
+function primeiroDia() {
+  return estado.metas.reduce((min, m) => m.start_date < min ? m.start_date : min, C.hoje());
+}
+
+// Setas trocam de semana, mantendo o dia da semana (sem passar de hoje nem do início)
 function irPara(d) {
   estado.dia = d; renderHoje(true);
 }
-$('#dia-ant').onclick = () => irPara(C.somaDias(estado.dia, -1));
-$('#dia-prox').onclick = () => { if (estado.dia < C.hoje()) irPara(C.somaDias(estado.dia, 1)); };
+function irSemana(n) {
+  let d = C.somaDias(estado.dia, 7 * n);
+  if (d > C.hoje()) d = C.hoje();
+  if (d < primeiroDia()) d = primeiroDia();
+  irPara(d);
+}
+$('#dia-ant').onclick = () => irSemana(-1);
+$('#dia-prox').onclick = () => irSemana(1);
 $('#dia-hoje').onclick = () => irPara(C.hoje());
 $('#faixa-dias').addEventListener('click', ev => {
   const b = ev.target.closest('button[data-dia]');
   if (b && !b.disabled) irPara(b.dataset.dia);
+});
+
+// Calendário do mês (sobreposto): tocar num dia leva até a semana dele
+let mesCal;
+document.body.appendChild($('#calendario')); // fora da tela, para cobrir também a barra de abas
+function abrirCalendario() {
+  mesCal = estado.dia.slice(0, 7);
+  renderCalendario();
+  $('#calendario').hidden = false;
+}
+function renderCalendario() {
+  const hoje = C.hoje(), ini = mesCal + '-01', fim = C.fimMes(ini), min = primeiroDia();
+  $('#cal-titulo').textContent = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(C.paraData(ini));
+  $('#cal-ant').disabled = ini <= min;
+  $('#cal-prox').disabled = C.somaDias(fim, 1) > hoje;
+  const semSel = C.inicioSemana(estado.dia);
+  $('#cal-grade').innerHTML = NOMES_DIAS.map(n => `<span class="cal-sem">${n[0]}</span>`).join('') +
+    '<span></span>'.repeat(C.diaSemana(ini)) +
+    C.listaDias(ini, fim).map(dia => {
+      const fora = dia > hoje || dia < min;
+      const cls = [dia === estado.dia ? 'sel' : '', dia === hoje ? 'hoje' : '', C.inicioSemana(dia) === semSel ? 'semana' : ''].join(' ');
+      return `<button data-dia="${dia}" class="${cls}" ${fora ? 'disabled' : ''}>${+dia.slice(8)}<span class="ponto ${fora ? '' : corDia(dia, hoje)}"></span></button>`;
+    }).join('');
+}
+function mudarMes(n) {
+  let [a, m] = mesCal.split('-').map(Number);
+  m += n;
+  if (m < 1) { m = 12; a--; }
+  if (m > 12) { m = 1; a++; }
+  mesCal = `${a}-${String(m).padStart(2, '0')}`;
+  renderCalendario();
+}
+$('#btn-calendario').onclick = abrirCalendario;
+$('#cal-ant').onclick = () => mudarMes(-1);
+$('#cal-prox').onclick = () => mudarMes(1);
+$('#calendario').addEventListener('click', ev => {
+  if (ev.target.id === 'calendario' || ev.target.closest('#cal-fechar')) { $('#calendario').hidden = true; return; }
+  const b = ev.target.closest('button[data-dia]');
+  if (b && !b.disabled) { $('#calendario').hidden = true; irPara(b.dataset.dia); }
 });
 
 // ---------------------------------------------------------------------
