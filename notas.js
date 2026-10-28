@@ -1,16 +1,13 @@
 // =====================================================================
 // notas.js — tela Notas, no estilo do Google Keep: cartões em mosaico,
-// notas de texto ou de caixinhas, cores, fixar, arquivar e busca.
+// notas de texto ou de caixinhas, fixar, arquivar e busca.
 // =====================================================================
 
-const CORES_NOTA = { vermelho: '#f28b82', laranja: '#fbbc04', amarelo: '#fff475', verde: '#ccff90',
-  'azul-claro': '#a7ffeb', azul: '#aecbfa', roxo: '#d7aefb', rosa: '#fdcfe8' };
 const notasUi = { busca: '', arquivo: false };
 let editando = null;   // nota aberta no editor
 let notaNova = false;  // true até a nota ter algum conteúdo salvo
 
 const semAcento = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const corNota = n => n.color && CORES_NOTA[n.color] ? `style="--nc:${CORES_NOTA[n.color]}"` : '';
 const notaVazia = n => !(n.title || '').trim() && !(n.body || '').trim() && !n.items.some(i => i.t.trim());
 
 // ---------------------------------------------------------------------
@@ -25,7 +22,7 @@ function cartaoNota(n) {
       (feitos.length ? `<li class="mais">+ ${feitos.length} ${feitos.length > 1 ? 'itens marcados' : 'item marcado'}</li>` : '');
     corpo = `<ul>${corpo}</ul>`;
   } else if (n.body) corpo = `<p>${esc(n.body)}</p>`;
-  return `<button class="nota-card" data-id="${n.id}" ${corNota(n)}>
+  return `<button class="nota-card" data-id="${n.id}">
       ${n.title ? `<strong>${esc(n.title)}</strong>` : ''}${corpo}
     </button>`;
 }
@@ -81,7 +78,6 @@ function abrirNota(n, kind) {
 
 function renderEditor() {
   const n = editando, lista = n.kind === 'list';
-  $('#editor-nota .nota-editor').setAttribute('style', n.color ? `--nc:${CORES_NOTA[n.color]}` : '');
   $('#ne-corpo').hidden = lista;
   $('#ne-itens').hidden = !lista;
   $('#ne-fixar').classList.toggle('sel', n.pinned);
