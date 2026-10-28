@@ -6,11 +6,14 @@ const fmtIdeia = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-di
 // Como no Keep: pendentes em cima; concluídas embaixo, numa seção recolhível
 let verConcluidas = lerLocal('ver_concluidas', false);
 
+const nomeTipo = v => $(`#ideia-tipo option[value="${v}"]`)?.textContent || v;
+
 function cartaoIdeia(i) {
   return `
     <div class="ideia ${i.done ? 'feita' : ''}" data-id="${i.id}">
       <input type="checkbox" class="marcar" ${i.done ? 'checked' : ''} aria-label="Marcar como feita">
       <div class="ideia-txt">
+        ${i.done && i.kind ? `<span class="ideia-tipo">${esc(nomeTipo(i.kind))}</span>` : ''}
         <strong>${esc(i.text)}</strong>
         <span class="det">${i.source ? 'via ' + esc(i.source) + ' · ' : ''}${fmtIdeia.format(new Date(i.created_at))}</span>
       </div>
@@ -24,17 +27,17 @@ function renderIdeias() {
   const lista = Object.values(estado.ideias).sort((a, b) => b.created_at.localeCompare(a.created_at));
   const fontes = [...new Set(lista.map(i => i.source).filter(Boolean))].sort();
   $('#fontes-ideia').innerHTML = fontes.map(f => `<option value="${esc(f)}">`).join('');
-  $('#ideias-vazio').hidden = lista.length > 0;
+  $('#ideias-vazio').hidden = true;  // a grade de tipos já aparece vazia
   const pendentes = lista.filter(i => !i.done), feitas = lista.filter(i => i.done);
   // Um card por tipo (o tipo faz o papel da primeira palavra da ideia); cada card rola sozinho
   const tipos = [...$('#ideia-tipo').options].slice(1).map(o => [o.value, o.textContent]);
   const grupos = [...tipos, ['', 'Outras']].map(([v, nome]) => [nome, pendentes.filter(i => (i.kind || '') === v || (!v && !tipos.some(t => t[0] === i.kind)))])
-    .filter(([, itens]) => itens.length);
-  $('#lista-ideias').innerHTML = grupos.map(([nome, itens]) => `
+    .filter(([nome, itens]) => nome !== 'Outras' || itens.length);  // os 8 tipos sempre aparecem
+  $('#lista-ideias').innerHTML = '<div class="grade-ideias">' + grupos.map(([nome, itens]) => `
     <section class="grupo-ideias">
       <h3>${esc(nome)} <span>${itens.length}</span></h3>
-      <div class="grupo-lista">${itens.map(cartaoIdeia).join('')}</div>
-    </section>`).join('') + (!feitas.length ? '' : `
+      <div class="grupo-lista">${itens.map(cartaoIdeia).join('') || '<p class="dica">—</p>'}</div>
+    </section>`).join('') + '</div>' + (!feitas.length ? '' : `
     <button class="link concluidas-topo" aria-expanded="${verConcluidas}">${verConcluidas ? '▾' : '▸'} ${feitas.length} concluída${feitas.length > 1 ? 's' : ''}</button>
     ${verConcluidas ? feitas.map(cartaoIdeia).join('') : ''}`);
 }
