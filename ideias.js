@@ -11,7 +11,6 @@ function cartaoIdeia(i) {
     <div class="ideia ${i.done ? 'feita' : ''}" data-id="${i.id}">
       <input type="checkbox" class="marcar" ${i.done ? 'checked' : ''} aria-label="Marcar como feita">
       <div class="ideia-txt">
-        ${i.kind ? `<span class="ideia-tipo">${esc($(`#ideia-tipo option[value="${i.kind}"]`)?.textContent || i.kind)}</span>` : ''}
         <strong>${esc(i.text)}</strong>
         <span class="det">${i.source ? 'via ' + esc(i.source) + ' · ' : ''}${fmtIdeia.format(new Date(i.created_at))}</span>
       </div>
@@ -27,7 +26,15 @@ function renderIdeias() {
   $('#fontes-ideia').innerHTML = fontes.map(f => `<option value="${esc(f)}">`).join('');
   $('#ideias-vazio').hidden = lista.length > 0;
   const pendentes = lista.filter(i => !i.done), feitas = lista.filter(i => i.done);
-  $('#lista-ideias').innerHTML = pendentes.map(cartaoIdeia).join('') + (!feitas.length ? '' : `
+  // Um card por tipo (o tipo faz o papel da primeira palavra da ideia); cada card rola sozinho
+  const tipos = [...$('#ideia-tipo').options].slice(1).map(o => [o.value, o.textContent]);
+  const grupos = [...tipos, ['', 'Outras']].map(([v, nome]) => [nome, pendentes.filter(i => (i.kind || '') === v || (!v && !tipos.some(t => t[0] === i.kind)))])
+    .filter(([, itens]) => itens.length);
+  $('#lista-ideias').innerHTML = grupos.map(([nome, itens]) => `
+    <section class="grupo-ideias">
+      <h3>${esc(nome)} <span>${itens.length}</span></h3>
+      <div class="grupo-lista">${itens.map(cartaoIdeia).join('')}</div>
+    </section>`).join('') + (!feitas.length ? '' : `
     <button class="link concluidas-topo" aria-expanded="${verConcluidas}">${verConcluidas ? '▾' : '▸'} ${feitas.length} concluída${feitas.length > 1 ? 's' : ''}</button>
     ${verConcluidas ? feitas.map(cartaoIdeia).join('') : ''}`);
 }
