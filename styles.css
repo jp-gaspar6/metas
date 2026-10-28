@@ -278,10 +278,10 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .concluidas-topo { align-self: flex-start; margin-top: 8px; color: var(--suave); }
 
 /* Notas (estilo Google Keep) */
-.notas-topo { display: flex; gap: 8px; }
+.notas-topo { display: flex; gap: 8px; margin-bottom: 14px; }
 .notas-topo input { flex: 1; min-width: 0; }
 #notas-arquivo.sel { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
-.notas-novas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 14px; }
+.notas-novas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: -4px 0 14px; }
 .notas-sec { font-size: 12px; font-weight: 700; color: var(--suave); text-transform: uppercase; letter-spacing: .06em; margin: 6px 4px 8px; }
 .mosaico { columns: 2 160px; column-gap: 10px; }
 .nota-card { display: block; width: 100%; break-inside: avoid; margin: 0 0 10px; text-align: left; border: 1px solid var(--borda);
