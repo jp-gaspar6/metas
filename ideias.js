@@ -13,9 +13,8 @@ function cartaoIdeia(i) {
     <div class="ideia ${i.done ? 'feita' : ''}" data-id="${i.id}">
       <input type="checkbox" class="marcar" ${i.done ? 'checked' : ''} aria-label="Marcar como feita">
       <div class="ideia-txt">
-        ${i.done && i.kind ? `<span class="ideia-tipo">${esc(nomeTipo(i.kind))}</span>` : ''}
         <strong>${esc(i.text)}</strong>
-        <span class="det">${i.source ? 'via ' + esc(i.source) + ' · ' : ''}${fmtIdeia.format(new Date(i.created_at))}</span>
+        <span class="det">${i.source ? 'via ' + esc(i.source) + ' · ' : ''}${fmtIdeia.format(new Date(i.created_at))}${i.done && i.kind ? ` <span class="ideia-tipo">${esc(nomeTipo(i.kind))}</span>` : ''}</span>
       </div>
       <button class="icone apagar" aria-label="Apagar ideia">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
