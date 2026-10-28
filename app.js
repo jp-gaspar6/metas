@@ -128,7 +128,8 @@ async function carregar() {
     console.warn('Sem conexão com o banco, usando cópia local', e);
     dados = lerLocal(chave, { metas: [], entries: [], notas: [], listas: [] });
   }
-  estado.todas = dados.metas.slice().sort((a, b) => a.sort_order - b.sort_order);   // inclui arquivadas (Ajustes)
+  // Excluídas somem do app, mas os registros continuam no banco
+  estado.todas = dados.metas.filter(m => !m.removed).sort((a, b) => a.sort_order - b.sort_order);   // inclui arquivadas (Ajustes)
   estado.metas = estado.todas.filter(m => m.active);
   estado.mapa = {}; for (const e of dados.entries) estado.mapa[e.goal_id + '|' + e.day] = e;
   estado.notas = {}; for (const n of dados.notas) estado.notas[n.day] = n.obs;

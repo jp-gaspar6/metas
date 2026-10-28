@@ -130,3 +130,6 @@ create policy "dono" on notes for all to authenticated using (user_id = auth.uid
 
 -- Tipo da ideia (fazer, pesquisar, assistir...)
 alter table ideas add column if not exists kind text;
+
+-- Meta excluída: some do app, mas os registros ficam guardados
+alter table goals add column if not exists removed boolean not null default false;

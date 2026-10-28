@@ -48,6 +48,7 @@ function formMeta(m, i) {
       </div>
       <div class="botoes">
         <span class="msg-ok"></span>
+        <button type="button" class="btn-sec btn-excluir" data-excluir>Excluir</button>
         <button type="button" class="btn-sec" data-arquivar>${m.active ? 'Arquivar' : 'Reativar'}</button>
         <button class="primario">Salvar</button>
       </div>
@@ -83,6 +84,27 @@ $('#lista-metas').addEventListener('click', async ev => {
     const erros = (await Promise.all(lista.map((m, k) => sb.from('goals').update({ sort_order: k }).eq('id', m.id)))).filter(r => r.error);
     if (erros.length) return alert('Não consegui salvar a ordem. Está sem internet?');
     return recarregarTudo();
+  }
+
+  // Excluir pede um segundo toque para confirmar; o histórico fica guardado
+  const excluir = ev.target.closest('[data-excluir]');
+  if (excluir) {
+    if (!excluir.classList.contains('confirmar')) {
+      excluir.classList.add('confirmar');
+      excluir.textContent = 'Confirmar exclusão';
+      excluir.insertAdjacentHTML('beforebegin', '<button type="button" class="btn-sec" data-cancelar-excluir>Cancelar</button>');
+      return;
+    }
+    const { error } = await sb.from('goals').update({ removed: true, active: false }).eq('id', meta.id);
+    if (error) return alert('Não consegui excluir. Está sem internet?');
+    return recarregarTudo();
+  }
+  const cancelar = ev.target.closest('[data-cancelar-excluir]');
+  if (cancelar) {
+    const b = cancelar.nextElementSibling;
+    b.classList.remove('confirmar'); b.textContent = 'Excluir';
+    cancelar.remove();
+    return;
   }
 
   if (ev.target.closest('[data-arquivar]')) {

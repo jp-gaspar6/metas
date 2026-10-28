@@ -220,6 +220,8 @@ main.largo { max-width: 1100px; }
 .dias-sel { display: flex; gap: 4px; flex-wrap: wrap; }
 .dias-sel button { flex: 1; min-width: 38px; padding: 8px 0; border-radius: 10px; border: 1.5px solid var(--borda); background: var(--cartao-2); font-size: 12px; font-weight: 700; }
 .dias-sel button.sel { background: var(--primaria); border-color: var(--primaria); color: #fff; }
+.btn-excluir { color: var(--vermelho, #e5484d); margin-right: auto; }
+.btn-excluir.confirmar { background: var(--vermelho, #e5484d); border-color: transparent; color: #fff; }
 .form-meta .botoes { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .msg-ok { color: var(--verde); font-size: 13px; font-weight: 600; }
 .previa { margin-top: 10px; font-size: 14px; }
