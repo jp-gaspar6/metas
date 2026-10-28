@@ -69,6 +69,7 @@ main.largo { max-width: 1100px; }
 .icone { display: grid; place-items: center; }
 .primario { background: linear-gradient(135deg, var(--primaria), var(--primaria-2)); color: var(--primaria-txt);
   border: 0; border-radius: 14px; padding: 14px; font-weight: 700; box-shadow: 0 6px 18px color-mix(in srgb, var(--primaria) 35%, transparent); }
+.acoes-backup > * { flex: 1; font-size: 15px; text-align: center; cursor: pointer; }
 .link { background: none; border: 0; color: var(--primaria); font-size: 13px; padding: 2px; font-weight: 600; }
 
 /* ---------- Hero: % da semana ---------- */
