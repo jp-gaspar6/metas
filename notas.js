@@ -101,9 +101,6 @@ function renderEditor() {
       `<button class="link ne-add">+ Item</button>` +
       (feitos.length ? `<div class="ne-sep">${feitos.length} ${feitos.length > 1 ? 'itens marcados' : 'item marcado'}</div>` + feitos.map(linha).join('') : '');
   }
-  $('#ne-cores').innerHTML = [null, ...Object.keys(CORES_NOTA)].map(c =>
-    `<button data-cor="${c || ''}" class="${(n.color || '') === (c || '') ? 'sel' : ''}" aria-label="${c || 'sem cor'}"
-       style="${c ? `background:${CORES_NOTA[c]}` : ''}"></button>`).join('');
 }
 
 function salvarNota() {
@@ -131,10 +128,6 @@ $('#ne-corpo').addEventListener('input', salvarNota);
 $('#ne-fechar').onclick = fecharNota;
 $('#editor-nota').addEventListener('click', ev => { if (ev.target.id === 'editor-nota') fecharNota(); });
 $('#ne-fixar').onclick = () => { editando.pinned = !editando.pinned; renderEditor(); salvarNota(); };
-$('#ne-cores').addEventListener('click', ev => {
-  const b = ev.target.closest('button[data-cor]');
-  if (b) { editando.color = b.dataset.cor || null; renderEditor(); salvarNota(); }
-});
 $('#ne-tipo').onclick = () => {
   const n = editando;
   n.body = $('#ne-corpo').value;
