@@ -151,6 +151,17 @@
         <input id="ideia-texto" required placeholder="Ideia" autocomplete="off">
         <input id="ideia-fonte" list="fontes-ideia" placeholder="Referência" autocomplete="off">
         <datalist id="fontes-ideia"></datalist>
+        <select id="ideia-tipo" aria-label="Tipo de ideia">
+          <option value="">Tipo…</option>
+          <option value="fazer">Fazer</option>
+          <option value="pesquisar">Pesquisar</option>
+          <option value="assistir">Assistir</option>
+          <option value="ler">Ler</option>
+          <option value="ouvir">Ouvir</option>
+          <option value="visitar">Visitar</option>
+          <option value="comprar">Comprar</option>
+          <option value="comer">Comer</option>
+        </select>
         <button type="submit" class="primario">Anotar</button>
       </form>
       <p id="ideias-vazio" class="dica">Nenhuma ideia anotada ainda.</p>

@@ -11,6 +11,7 @@ function cartaoIdeia(i) {
     <div class="ideia ${i.done ? 'feita' : ''}" data-id="${i.id}">
       <input type="checkbox" class="marcar" ${i.done ? 'checked' : ''} aria-label="Marcar como feita">
       <div class="ideia-txt">
+        ${i.kind ? `<span class="ideia-tipo">${esc($(`#ideia-tipo option[value="${i.kind}"]`)?.textContent || i.kind)}</span>` : ''}
         <strong>${esc(i.text)}</strong>
         <span class="det">${i.source ? 'via ' + esc(i.source) + ' · ' : ''}${fmtIdeia.format(new Date(i.created_at))}</span>
       </div>
@@ -44,7 +45,7 @@ $('#form-ideia').onsubmit = ev => {
   const texto = $('#ideia-texto').value.trim();
   if (!texto) return;
   const agora = new Date().toISOString();
-  const linha = { id: crypto.randomUUID(), text: texto, source: $('#ideia-fonte').value.trim() || null, done: false, created_at: agora };
+  const linha = { id: crypto.randomUUID(), text: texto, source: $('#ideia-fonte').value.trim() || null, kind: $('#ideia-tipo').value || null, done: false, created_at: agora };
   estado.ideias[linha.id] = linha;
   enfileirar('ideas', linha.id, linha);
   $('#form-ideia').reset();

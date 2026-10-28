@@ -103,6 +103,7 @@ create table if not exists ideas (
   user_id    uuid not null default auth.uid() references auth.users on delete cascade,
   text       text not null,
   source     text,
+  kind       text,
   done       boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -126,3 +127,6 @@ create table if not exists notes (
 );
 alter table notes enable row level security;
 create policy "dono" on notes for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Tipo da ideia (fazer, pesquisar, assistir...)
+alter table ideas add column if not exists kind text;
