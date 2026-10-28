@@ -155,7 +155,7 @@ $('#form-troca-senha').onsubmit = async ev => {
 };
 
 // ---------------------------------------------------------------------
-// Exportar para Excel: abas Registros, Resumo semanal e Resumo mensal
+// Exportar para Excel: abas Registros, Resumo semanal, Resumo mensal, Ideias e Notas (serve de backup)
 // ---------------------------------------------------------------------
 $('#btn-exportar').onclick = () => {
   if (!window.XLSX) return alert('A biblioteca do Excel ainda não carregou. Tente de novo em alguns segundos.');
@@ -196,11 +196,20 @@ $('#btn-exportar').onclick = () => {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(registros), 'Registros');
   XLSX.utils.book_append_sheet(wb, abaPct(resumo('semana')), 'Resumo semanal');
   XLSX.utils.book_append_sheet(wb, abaPct(resumo('mes')), 'Resumo mensal');
+  // Ideias e Notas vão com o id, para a importação do backup atualizar em vez de duplicar
+  const sn = b => b ? 'Sim' : 'Não';
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.values(estado.ideias).map(i => ({
+    id: i.id, Ideia: i.text, 'Referência': i.source || '', Tipo: i.kind || '', Feita: sn(i.done), 'Criada em': i.created_at
+  })), { header: ['id', 'Ideia', 'Referência', 'Tipo', 'Feita', 'Criada em'] }), 'Ideias');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.values(estado.anot).map(n => ({
+    id: n.id, 'Título': n.title || '', Tipo: n.kind, Texto: n.body || '', Itens: JSON.stringify(n.items || []),
+    Fixada: sn(n.pinned), Arquivada: sn(n.archived), 'Criada em': n.created_at, 'Atualizada em': n.updated_at || n.created_at
+  })), { header: ['id', 'Título', 'Tipo', 'Texto', 'Itens', 'Fixada', 'Arquivada', 'Criada em', 'Atualizada em'] }), 'Notas');
   XLSX.writeFile(wb, `metas-${hoje}.xlsx`);
 };
 
 // ---------------------------------------------------------------------
-// Importar CSV: mostra uma prévia e só grava depois de confirmar
+// Importar CSV ou o backup em Excel: mostra uma prévia e só grava depois de confirmar
 // ---------------------------------------------------------------------
 // Normaliza nomes de coluna/meta: minúsculas, sem acento, só letras e "_"
 function normalizar(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
@@ -209,27 +218,68 @@ const APELIDOS = { organizacao: 'Organizar a semana', roi_unhas: 'Não roer unha
 
 let importacao = null;   // linhas prontas aguardando confirmação
 
+// Liga cada coluna a uma meta pelo nome, pergunta ou apelido
+function metasDasColunas(cab) {
+  const porCol = {}, ignoradas = [];
+  for (const col of cab) {
+    if (['data', 'dia', 'sentimento', 'obs'].includes(col)) continue;
+    const meta = estado.todas.find(m => normalizar(m.name) === col || normalizar(m.question || '') === col || APELIDOS[col] === m.name);
+    if (meta) porCol[col] = meta; else ignoradas.push(col);
+  }
+  return { porCol, ignoradas };
+}
+
+// Backup em Excel (o arquivo que o próprio app exporta): abas Registros, Ideias e Notas
+function lerBackup(wb) {
+  const aba = nome => wb.Sheets[nome] ? XLSX.utils.sheet_to_json(wb.Sheets[nome], { defval: '' }) : [];
+  const txt = v => String(v ?? '').trim();
+  const sim = v => /^s/i.test(txt(v));
+  const agora = new Date().toISOString();
+  const regs = aba('Registros').map(l => {
+    const reg = {};
+    for (const [k, v] of Object.entries(l)) reg[normalizar(k)] = txt(v);
+    // Se a planilha foi salva no Excel, a data pode virar número de série
+    reg.data = typeof l.Data === 'number' ? XLSX.SSF.format('yyyy-mm-dd', l.Data) : txt(l.Data);
+    return reg;
+  });
+  const { porCol, ignoradas } = metasDasColunas(Object.keys(regs[0] || {}));
+  const r = regsParaLinhas(regs, porCol);
+  r.ideias = aba('Ideias').filter(l => txt(l.id) && txt(l.Ideia)).map(l => ({
+    id: txt(l.id), text: txt(l.Ideia), source: txt(l['Referência']) || null, kind: txt(l.Tipo) || null,
+    done: sim(l.Feita), created_at: txt(l['Criada em']) || agora
+  }));
+  r.anot = aba('Notas').filter(l => txt(l.id)).map(l => {
+    let itens = [];
+    try { itens = JSON.parse(txt(l.Itens) || '[]'); } catch { }
+    return { id: txt(l.id), kind: txt(l.Tipo) === 'list' ? 'list' : 'text', title: txt(l['Título']), body: txt(l.Texto), items: itens,
+      pinned: sim(l.Fixada), archived: sim(l.Arquivada), created_at: txt(l['Criada em']) || agora, updated_at: txt(l['Atualizada em']) || agora };
+  });
+  return { r, porCol, ignoradas };
+}
+
 $('#arq-csv').onchange = async ev => {
   const arq = ev.target.files[0];
   ev.target.value = '';
   if (!arq) return;
-  const texto = await arq.text();
-  const cab = texto.split(/\r?\n/)[0].split(';').map(normalizar);
-  if (!cab.includes('data')) return $('#previa-csv').innerHTML = '<p class="previa vermelho">O arquivo precisa ter a coluna "data" e usar ";" como separador.</p>';
-
-  // Liga cada coluna a uma meta pelo nome, pergunta ou apelido
-  const porCol = {}, ignoradas = [];
-  for (const col of cab) {
-    if (['data', 'sentimento', 'obs'].includes(col)) continue;
-    const meta = estado.todas.find(m => normalizar(m.name) === col || normalizar(m.question || '') === col || APELIDOS[col] === m.name);
-    if (meta) porCol[col] = meta; else ignoradas.push(col);
+  let porCol, ignoradas;
+  if (/\.xlsx$/i.test(arq.name)) {
+    if (!window.XLSX) return alert('A biblioteca do Excel ainda não carregou. Tente de novo em alguns segundos.');
+    const wb = XLSX.read(await arq.arrayBuffer());
+    if (!wb.Sheets.Registros) return $('#previa-csv').innerHTML = '<p class="previa vermelho">Esse Excel não tem a aba "Registros". Use o arquivo exportado pelo app.</p>';
+    ({ r: importacao, porCol, ignoradas } = lerBackup(wb));
+  } else {
+    const texto = await arq.text();
+    const cab = texto.split(/\r?\n/)[0].split(';').map(normalizar);
+    if (!cab.includes('data')) return $('#previa-csv').innerHTML = '<p class="previa vermelho">O arquivo precisa ter a coluna "data" e usar ";" como separador.</p>';
+    ({ porCol, ignoradas } = metasDasColunas(cab));
+    // csvParaLinhas lê o cabeçalho original; reescreve-o normalizado
+    const linhasTxt = texto.split(/\r?\n/); linhasTxt[0] = cab.join(';');
+    importacao = { ...csvParaLinhas(linhasTxt.join('\n'), porCol), ideias: [], anot: [] };
   }
-  // csvParaLinhas lê o cabeçalho original; reescreve-o normalizado
-  const linhasTxt = texto.split(/\r?\n/); linhasTxt[0] = cab.join(';');
-  importacao = csvParaLinhas(linhasTxt.join('\n'), porCol);
   const dias = new Set(importacao.entries.map(e => e.day).concat(importacao.notas.map(n => n.day)));
+  const extras = [importacao.ideias.length && `<b>${importacao.ideias.length}</b> ideias`, importacao.anot.length && `<b>${importacao.anot.length}</b> notas`].filter(Boolean);
   $('#previa-csv').innerHTML = `<div class="previa">
-      <p><b>${dias.size}</b> dias, <b>${importacao.entries.length}</b> valores e <b>${importacao.notas.length}</b> anotações.<br>
+      <p><b>${dias.size}</b> dias, <b>${importacao.entries.length}</b> valores e <b>${importacao.notas.length}</b> anotações${extras.length ? ', além de ' + extras.join(' e ') : ''}.<br>
       Colunas reconhecidas: ${Object.entries(porCol).map(([c, m]) => `${c} → ${esc(m.name)}`).join(', ') || 'nenhuma'}.
       ${ignoradas.length ? `<br><span class="amarelo">Ignoradas: ${ignoradas.join(', ')}</span>` : ''}</p>
       <p class="dica">Valores do arquivo substituem os já registrados nos mesmos dias.</p>
@@ -252,6 +302,8 @@ $('#previa-csv').addEventListener('click', async ev => {
   try {
     await enviar('entries', importacao.entries, 'user_id,goal_id,day');
     await enviar('day_notes', importacao.notas, 'user_id,day');
+    await enviar('ideas', importacao.ideias, 'id');
+    await enviar('notes', importacao.anot, 'id');
     importacao = null;
     $('#previa-csv').innerHTML = '<p class="previa msg-ok">Importação concluída ✓</p>';
     await carregar();

@@ -32,12 +32,21 @@
   function csvParaLinhas(texto, metasPorCsv) {
     const linhas = texto.trim().split(/\r?\n/);
     const cab = linhas.shift().split(';').map(s => s.trim().toLowerCase());
-    const entries = [], notas = [];
-    for (const l of linhas) {
+    const regs = linhas.map(l => {
       const cols = l.split(';');
       const reg = {}; cab.forEach((c, i) => reg[c] = (cols[i] ?? '').trim());
       // Se obs é a última coluna, ela pode conter ";" — junta o resto da linha
       if (cab[cab.length - 1] === 'obs') reg.obs = cols.slice(cab.length - 1).join(';').trim();
+      return reg;
+    });
+    return regsParaLinhas(regs, metasPorCsv);
+  }
+
+  // Mesma conversão a partir de registros já separados ({ data, <coluna>: valor, sentimento, obs }),
+  // usada também na aba Registros do backup em Excel
+  function regsParaLinhas(regs, metasPorCsv) {
+    const entries = [], notas = [];
+    for (const reg of regs) {
       const dia = reg.data;
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dia)) continue;
       for (const [col, meta] of Object.entries(metasPorCsv)) {
@@ -54,6 +63,6 @@
     return { entries, notas };
   }
 
-  const exp = { SEED, csvParaLinhas };
+  const exp = { SEED, csvParaLinhas, regsParaLinhas };
   if (typeof module !== 'undefined') module.exports = exp; else Object.assign(raiz, exp);
 })(this);

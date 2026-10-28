@@ -226,9 +226,11 @@
         <h3>Dados</h3>
         <div class="acoes">
           <button id="btn-exportar" class="primario">⬇ Exportar para Excel</button>
-          <label class="btn-sec arquivo">⬆ Importar CSV<input id="arq-csv" type="file" accept=".csv,text/csv,text/plain" hidden></label>
+          <label class="btn-sec arquivo">⬆ Importar backup<input id="arq-csv" type="file" accept=".xlsx,.csv,text/csv,text/plain" hidden></label>
         </div>
-        <p class="dica">CSV separado por ";" com a coluna <b>data</b> (AAAA-MM-DD) e uma coluna por meta
+        <p class="dica">O Excel exportado é o seu backup (registros, OBS, ideias e notas). Para restaurar, importe o mesmo arquivo;
+          as metas precisam existir no app.</p>
+        <p class="dica">Também aceita CSV separado por ";" com a coluna <b>data</b> (AAAA-MM-DD) e uma coluna por meta
           (nome da meta, ex.: <code>leitura;frutas;agua;reflexao;organizacao;roi_unhas;sentimento;obs</code>).
           Campo vazio não altera nada.</p>
         <div id="previa-csv"></div>
