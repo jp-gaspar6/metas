@@ -275,7 +275,7 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .notas-sec { font-size: 12px; font-weight: 700; color: var(--suave); text-transform: uppercase; letter-spacing: .06em; margin: 6px 4px 8px; }
 .mosaico { columns: 2 160px; column-gap: 10px; }
 .nota-card { display: block; width: 100%; break-inside: avoid; margin: 0 0 10px; text-align: left; border: 1px solid var(--borda);
-  border-radius: 16px; padding: 12px 14px; background: var(--cartao); color: var(--texto); }
+  border-radius: 16px; padding: 14px 18px; background: var(--cartao); color: var(--texto); }
 .nota-card[style*="--nc"], .nota-editor[style*="--nc"] { background: color-mix(in srgb, var(--nc) var(--nota-mix), var(--cartao)); border-color: transparent; }
 .nota-card strong { display: block; margin-bottom: 4px; overflow-wrap: anywhere; }
 .nota-card p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px;
@@ -283,14 +283,14 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .nota-card ul { list-style: none; margin: 0; padding: 0; font-size: 14px; }
 .nota-card li { overflow-wrap: anywhere; }
 .nota-card li.mais { color: var(--suave); font-size: 12px; margin-top: 4px; }
-.nota-editor { background: var(--cartao); border-radius: var(--raio); padding: 14px; width: 100%; max-width: 520px;
+.nota-editor { background: var(--cartao); border-radius: var(--raio); padding: 18px 22px; width: 100%; max-width: 520px;
   max-height: calc(100dvh - 32px); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--sombra); }
 .nota-editor input, .nota-editor textarea { background: transparent; border: 0; color: inherit; font: inherit; outline: none; padding: 4px 2px; }
 .ne-topo { display: flex; align-items: center; gap: 8px; }
 #ne-titulo { flex: 1; min-width: 0; font-weight: 700; font-size: 18px; }
 #ne-fixar { background: transparent; border-color: transparent; color: var(--suave); }
 #ne-fixar.sel { color: var(--primaria); border-color: var(--primaria); }
-#ne-corpo { resize: vertical; min-height: 140px; }
+#ne-corpo { resize: vertical; min-height: 140px; padding: 10px 12px; }
 .ne-itens { display: flex; flex-direction: column; gap: 2px; }
 .ne-item { display: flex; align-items: center; gap: 8px; }
 .ne-item .ne-txt { flex: 1; min-width: 0; }
