@@ -351,15 +351,15 @@ $('#ne-itens').addEventListener('input', ev => {
   if (ev.target.classList.contains('ne-txt')) { itemDe(ev.target).t = ev.target.value; salvarNota(); sugerir(ev.target); }
 });
 
-// Sugestão: ao digitar algo que já está na lista (marcado), oferece reaproveitar o item
+// Sugestão: ao digitar algo que já está na lista, oferece reaproveitar o item (sem duplicar)
 function sugerir(campo) {
   document.querySelector('.ne-sug')?.remove();
   const q = semAcento(campo.value.trim()), atual = itemDe(campo);
   if (!q) return;
-  const achados = editando.items.filter(i => i !== atual && i.done && semAcento(i.t).includes(q)).slice(0, 5);
+  const achados = editando.items.filter(i => i !== atual && i.t.trim() && semAcento(i.t).includes(q)).slice(0, 5);
   if (!achados.length) return;
   campo.closest('.ne-item').insertAdjacentHTML('beforeend', `<div class="ne-sug">${achados.map(i =>
-    `<button data-id="${i.id}">☑ ${esc(i.t)}</button>`).join('')}</div>`);
+    `<button data-id="${i.id}">${i.done ? '☑' : '☐'} ${esc(i.t)}</button>`).join('')}</div>`);
 }
 $('#ne-itens').addEventListener('pointerdown', ev => {
   const b = ev.target.closest('.ne-sug button');
@@ -397,4 +397,17 @@ $('#ne-itens').addEventListener('keydown', ev => {
   editando.items.splice(editando.items.indexOf(atual) + 1, 0, novo);
   renderEditor();
   $(`#ne-itens .ne-item[data-id="${novo.id}"] .ne-txt`).focus();
+});
+
+// Deslizar para o lado fecha a nota e volta para o mosaico
+let deslize = null;
+$('#editor-nota').addEventListener('touchstart', ev => {
+  const t = ev.touches[0];
+  deslize = ev.touches.length === 1 ? { x: t.clientX, y: t.clientY } : null;
+}, { passive: true });
+$('#editor-nota').addEventListener('touchend', ev => {
+  if (!deslize) return;
+  const t = ev.changedTouches[0], dx = t.clientX - deslize.x, dy = t.clientY - deslize.y;
+  deslize = null;
+  if (Math.abs(dx) > 80 && Math.abs(dy) < Math.abs(dx) / 2) fecharNota();
 });
