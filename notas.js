@@ -348,8 +348,33 @@ $('#ne-apagar').onclick = async () => {
 // Itens da lista
 const itemDe = el => editando.items.find(i => i.id === el.closest('.ne-item').dataset.id);
 $('#ne-itens').addEventListener('input', ev => {
-  if (ev.target.classList.contains('ne-txt')) { itemDe(ev.target).t = ev.target.value; salvarNota(); }
+  if (ev.target.classList.contains('ne-txt')) { itemDe(ev.target).t = ev.target.value; salvarNota(); sugerir(ev.target); }
 });
+
+// Sugestão: ao digitar algo que já está na lista (marcado), oferece reaproveitar o item
+function sugerir(campo) {
+  document.querySelector('.ne-sug')?.remove();
+  const q = semAcento(campo.value.trim()), atual = itemDe(campo);
+  if (!q) return;
+  const achados = editando.items.filter(i => i !== atual && i.done && semAcento(i.t).includes(q)).slice(0, 5);
+  if (!achados.length) return;
+  campo.closest('.ne-item').insertAdjacentHTML('beforeend', `<div class="ne-sug">${achados.map(i =>
+    `<button data-id="${i.id}">☑ ${esc(i.t)}</button>`).join('')}</div>`);
+}
+$('#ne-itens').addEventListener('pointerdown', ev => {
+  const b = ev.target.closest('.ne-sug button');
+  if (!b) return;
+  ev.preventDefault();
+  const atual = itemDe(b), achado = editando.items.find(i => i.id === b.dataset.id);
+  achado.done = false;
+  const lista = editando.items.filter(i => i !== achado);
+  lista.splice(lista.indexOf(atual), 1, achado);   // o item reaproveitado ocupa o lugar do que estava sendo digitado
+  editando.items = lista;
+  renderEditor(); salvarNota();
+});
+$('#ne-itens').addEventListener('focusout', () => setTimeout(() => {
+  if (!$('#ne-itens').contains(document.activeElement)) document.querySelector('.ne-sug')?.remove();
+}));
 $('#ne-itens').addEventListener('change', ev => {
   if (ev.target.classList.contains('ne-marca')) { itemDe(ev.target).done = ev.target.checked; renderEditor(); salvarNota(); }
 });

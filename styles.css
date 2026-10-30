@@ -333,3 +333,8 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .ne-add { align-self: flex-start; margin: 4px 0; }
 .ne-sep { font-size: 15px; color: var(--suave); border-top: 1px solid var(--borda); padding-top: 8px; margin-top: 6px; }
 .link.perigo { color: var(--vermelho); }
+.ne-item { position: relative; }
+.ne-sug { position: absolute; z-index: 20; top: 100%; left: 36px; right: 40px; background: var(--cartao); border: 1px solid var(--borda);
+  border-radius: 10px; box-shadow: var(--sombra); padding: 4px 0; }
+.ne-sug button { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; background: transparent; border: 0;
+  padding: 12px 14px; font-size: 16px; color: var(--texto); }
