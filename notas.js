@@ -207,6 +207,7 @@ function abrirNota(n, kind) {
   $('#ne-cores').hidden = $('#ne-menu').hidden = true;
   renderEditor();
   $('#editor-nota').hidden = false;
+  history.pushState({ nota: true }, '');
   if (notaNova) (kind === 'list' ? $('#ne-itens input.ne-txt') : $('#ne-corpo')).focus();
 }
 
@@ -279,8 +280,9 @@ function gravarNota() {
   $('#ne-mais').hidden = false;
 }
 
-function fecharNota() {
+function fecharNota(peloVoltar) {
   if (!editando) return;
+  if (peloVoltar !== true && history.state?.nota) setTimeout(() => history.back());
   salvarNota();
   $('#editor-nota').hidden = true;
   editando = null;
@@ -341,6 +343,7 @@ $('#ne-apagar').onclick = async () => {
   const id = editando.id;
   apagarLocal(id);
   $('#editor-nota').hidden = true; editando = null; renderNotas();
+  if (history.state?.nota) history.back();
   const { error } = await sb.from('notes').delete().eq('id', id);
   if (error) { status('erro ao apagar', true); console.error(error); }
 };
@@ -399,15 +402,5 @@ $('#ne-itens').addEventListener('keydown', ev => {
   $(`#ne-itens .ne-item[data-id="${novo.id}"] .ne-txt`).focus();
 });
 
-// Deslizar para o lado fecha a nota e volta para o mosaico
-let deslize = null;
-$('#editor-nota').addEventListener('touchstart', ev => {
-  const t = ev.touches[0];
-  deslize = ev.touches.length === 1 ? { x: t.clientX, y: t.clientY } : null;
-}, { passive: true });
-$('#editor-nota').addEventListener('touchend', ev => {
-  if (!deslize) return;
-  const t = ev.changedTouches[0], dx = t.clientX - deslize.x, dy = t.clientY - deslize.y;
-  deslize = null;
-  if (Math.abs(dx) > 80 && Math.abs(dy) < Math.abs(dx) / 2) fecharNota();
-});
+// Gesto "voltar" do Android (deslizar da borda): fecha a nota em vez de sair do app
+addEventListener('popstate', () => { if (editando) fecharNota(true); });
