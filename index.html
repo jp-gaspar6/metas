@@ -101,9 +101,10 @@
     <!-- Semana / Mês (mesma tela, agregação diferente) -->
     <section id="tela-periodo" class="tela" hidden>
       <h2 id="periodo-titulo"></h2>
-      <!-- Só na aba Semana: escolhe entre resumo semanal, dia a dia e comparação por dia da semana -->
+      <!-- Escolhe entre resumo semanal, mensal, dia a dia e comparação por dia da semana -->
       <div id="periodo-visoes" class="chips segment">
         <button data-visao="semanas" class="sel">Semanas</button>
+        <button data-visao="meses">Meses</button>
         <button data-visao="diario">Dia a dia</button>
         <button data-visao="dow">Por dia da semana</button>
       </div>
@@ -271,8 +272,7 @@
 
   <nav id="abas" class="abas" hidden>
     <button data-aba="hoje" class="ativa"><b>☀️</b>Hoje</button>
-    <button data-aba="semana"><b>📅</b>Semana</button>
-    <button data-aba="mes"><b>🗓️</b>Mês</button>
+    <button data-aba="semana"><b>📅</b>Período</button>
     <button data-aba="graficos"><b>📈</b>Gráficos</button>
     <button data-aba="ideias"><b>💡</b>Ideias</button>
     <button data-aba="anotacoes"><b>📝</b>Notas</button>

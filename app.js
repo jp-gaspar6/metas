@@ -233,9 +233,9 @@ function mostrarTela(aba) {
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
   document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
-  document.querySelector('main').classList.toggle('largo', aba === 'semana' || aba === 'mes');
+  document.querySelector('main').classList.toggle('largo', aba === 'semana');
   if (aba === 'hoje') { $('#tela-hoje').hidden = false; renderHoje(true); }
-  else if (aba === 'semana' || aba === 'mes') { $('#tela-periodo').hidden = false; renderPeriodo(aba); }
+  else if (aba === 'semana') { $('#tela-periodo').hidden = false; renderPeriodo(); }
   else if (aba === 'graficos') { $('#tela-graficos').hidden = false; renderGraficos(); }
   else if (aba === 'ideias' && !estado.leitor) { $('#tela-ideias').hidden = false; renderIdeias(); }
   else if (aba === 'anotacoes' && !estado.leitor) { $('#tela-anotacoes').hidden = false; renderNotas(); }
@@ -513,25 +513,22 @@ function totalMeta(meta, de, ate, hoje) {
   return C.listaDias(ini, fim).reduce((s, d) => s + C.valor(meta, estado.mapa, d), 0);
 }
 
-// Visão e filtros da aba Semana (guardados só em memória)
+// Visão e filtros da aba Período (guardados só em memória)
 const tabela = { visao: 'semanas', dias: 90, dows: [0, 1, 2, 3, 4, 5, 6] };
 
-function renderPeriodo(tipo) {
-  const naSemana = tipo === 'semana';
-  $('#periodo-visoes').hidden = !naSemana;
-  document.querySelectorAll('#periodo-visoes button').forEach(b => b.classList.toggle('sel', b.dataset.visao === tabela.visao));
-  const visao = naSemana ? tabela.visao : 'semanas';
-  $('#periodo-titulo').textContent = !naSemana ? 'Meses' : visao === 'semanas' ? 'Semanas (Dom–Sáb)'
-    : visao === 'diario' ? 'Dia a dia' : 'Por dia da semana';
+function renderPeriodo() {
+  const visao = tabela.visao;
+  document.querySelectorAll('#periodo-visoes button').forEach(b => b.classList.toggle('sel', b.dataset.visao === visao));
+  $('#periodo-titulo').textContent = { semanas: 'Semanas (Dom–Sáb)', meses: 'Meses', diario: 'Dia a dia', dow: 'Por dia da semana' }[visao];
   renderFiltros(visao);
   if (visao === 'diario') renderDiario();
   else if (visao === 'dow') renderPorDiaSemana();
-  else renderResumoPeriodos(tipo);
+  else renderResumoPeriodos(visao === 'meses' ? 'mes' : 'semana');
 }
 
 // Filtros: período (Dia a dia e Por dia da semana) e dias da semana (só Dia a dia)
 function renderFiltros(visao) {
-  if (visao === 'semanas') { $('#periodo-filtros').innerHTML = ''; return; }
+  if (visao === 'semanas' || visao === 'meses') { $('#periodo-filtros').innerHTML = ''; return; }
   const per = [[30, '30 dias'], [90, '90 dias'], [365, '1 ano'], [0, 'Tudo']]
     .map(([d, t]) => `<button data-fdias="${d}" class="${tabela.dias === d ? 'sel' : ''}">${t}</button>`).join('');
   const dows = visao !== 'diario' ? '' : `<div class="dias-sel filtro-dows">${NOMES_DIAS.map((n, d) =>
@@ -541,7 +538,7 @@ function renderFiltros(visao) {
 
 $('#periodo-visoes').addEventListener('click', ev => {
   const b = ev.target.closest('[data-visao]');
-  if (b) { tabela.visao = b.dataset.visao; renderPeriodo('semana'); }
+  if (b) { tabela.visao = b.dataset.visao; renderPeriodo(); }
 });
 $('#periodo-filtros').addEventListener('click', ev => {
   const p = ev.target.closest('[data-fdias]');
@@ -551,7 +548,7 @@ $('#periodo-filtros').addEventListener('click', ev => {
     const n = Number(d.dataset.fdow);
     tabela.dows = tabela.dows.includes(n) ? tabela.dows.filter(x => x !== n) : tabela.dows.concat(n);
   }
-  if (p || d) renderPeriodo('semana');
+  if (p || d) renderPeriodo();
 });
 
 // Dias do período escolhido (até hoje, a partir do início da primeira meta)
