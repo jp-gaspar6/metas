@@ -3,9 +3,9 @@
 // internet. Os DADOS nÃ£o passam por aqui (ficam no Supabase + fila local).
 // Ao mudar qualquer arquivo do app, aumente a VERSAO para forÃ§ar atualizaÃ§Ã£o.
 // =====================================================================
-const VERSAO = 'metas-v32';
+const VERSAO = 'metas-v33';
 const ARQUIVOS = [
-  './', 'index.html', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js', 'ideias.js', 'notas.js',
+  './', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js', 'ideias.js', 'notas.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',
@@ -32,13 +32,13 @@ self.addEventListener('fetch', ev => {
 
   // Arquivos do app: rede primeiro (pega a versÃ£o nova), cache se estiver offline
   if (url.origin === location.origin) {
-    ev.respondWith(
-      fetch(req).then(resp => {
-        const copia = resp.clone();
-        caches.open(VERSAO).then(c => c.put(req, copia));
-        return resp;
-      }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./')))
-    );
+    const doCache = () => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./'));
+    const daRede = fetch(req).then(resp => {
+      if (resp.ok && !resp.redirected) { const copia = resp.clone(); caches.open(VERSAO).then(c => c.put(req, copia)); }
+      return resp;
+    });
+    const espera = new Promise(ok => setTimeout(ok, 3000)).then(doCache).then(r => r || daRede);
+    ev.respondWith(Promise.race([daRede, espera]).catch(() => doCache()));
     return;
   }
   // Bibliotecas do CDN tÃªm versÃ£o fixa: cache primeiro

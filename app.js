@@ -72,7 +72,7 @@ $('#form-senha').onsubmit = async ev => {
   mostrarTela('hoje');
 };
 
-$('#btn-sair').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$('#btn-sair').onclick = async () => { localStorage.removeItem('ultimo_user'); await sb.auth.signOut(); location.reload(); };
 
 // true enquanto o usuário define a senha pelo link do e-mail (recuperação ou convite)
 let modoSenha = /type=invite/.test(location.hash);
@@ -80,7 +80,10 @@ sb.auth.onAuthStateChange((ev, sessao) => {
   const u = sessao && sessao.user;
   if (ev === 'PASSWORD_RECOVERY') modoSenha = true;
   if (u && (!estado.user || estado.user.id !== u.id)) entrar(u);
-  else if (!u) mostrarTela('login');
+  else if (!u && ev !== 'SIGNED_OUT' && !navigator.onLine && lerLocal('ultimo_user', null)) {
+    // Sem internet o login expirado não renova: abre com a cópia local e renova quando a rede voltar
+    if (!estado.user) entrar(lerLocal('ultimo_user', null));
+  } else if (!u) mostrarTela('login');
   if (modoSenha && u) mostrarTela('senha');
 });
 
@@ -91,8 +94,10 @@ async function entrar(user) {
   $('#abas').hidden = false;
   status('carregando…');
   // Leitor: conta convidada que só vê os dados do dono (sem OBS, sem editar)
-  const { data: vinculo } = await sb.from('viewers').select('owner_id').eq('viewer_id', user.id).limit(1);
-  estado.leitor = !!(vinculo && vinculo.length);
+  gravarLocal('ultimo_user', { id: user.id, email: user.email });
+  const { data: vinculo, error: erroVinculo } = await sb.from('viewers').select('owner_id').eq('viewer_id', user.id).limit(1);
+  estado.leitor = erroVinculo ? lerLocal('leitor_' + user.id, false) : !!(vinculo && vinculo.length);
+  gravarLocal('leitor_' + user.id, estado.leitor);
   document.body.classList.toggle('leitor', estado.leitor);
   if (estado.leitor) fila = {};
   await carregar();
