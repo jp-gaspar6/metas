@@ -29,7 +29,21 @@
       return v == null ? 0 : Number(v);
     }
     const v = e ? e.bool_value : null;
+    // Meta de um dia só na semana (ex.: organizar a semana no domingo):
+    // fazer até 2 dias antes ou depois também vale para o dia certo
+    if (v !== meta.success_value && meta.weekdays.length === 1 && meta.weekdays[0] === diaSemana(d)) {
+      for (const n of [-2, -1, 1, 2]) {
+        const viz = mapa[meta.id + '|' + somaDias(d, n)];
+        if (viz && viz.bool_value === meta.success_value) return meta.success_value;
+      }
+    }
     return v == null ? (meta.default_value ?? null) : v;
+  }
+  // Para metas de um dia só, o dia da semana que uma resposta em d cobre (ou null)
+  function diaAlvo(meta, d) {
+    if (meta.kind !== 'boolean' || meta.weekdays.length !== 1) return null;
+    for (const n of [0, -1, -2, 1, 2]) { const x = somaDias(d, n); if (diaSemana(x) === meta.weekdays[0]) return x; }
+    return null;
   }
   function cumpriu(meta, v) {
     return meta.kind === 'numeric' ? v >= Number(meta.target) : v === meta.success_value;
@@ -86,6 +100,6 @@
   function pctTexto(p) { return p == null ? '—' : Math.round(p * 100) + '%'; }
 
   const Calc = { FUSO, hoje, paraData, somaDias, diaSemana, inicioSemana, inicioMes, fimMes,
-                 listaDias, valor, cumpriu, pctMeta, resumo, cor, pctTexto };
+                 listaDias, valor, diaAlvo, cumpriu, pctMeta, resumo, cor, pctTexto };
   if (typeof module !== 'undefined') module.exports = Calc; else raiz.Calc = Calc;
 })(this);

@@ -320,8 +320,10 @@ function renderHoje(trocouDia) {
   $('#cards').innerHTML = metas.map((m, i) => {
     const [icone, corMeta] = visual(m, i);
     const e = estado.mapa[m.id + '|' + d] || {};
-    const conta = m.weekdays.includes(dow) && d >= m.start_date;
-    const ok = conta && C.cumpriu(m, C.valor(m, estado.mapa, d)) && (m.kind === 'numeric' ? e.num_value != null : true);
+    // Meta de um dia só: aparece ativa também 2 dias antes/depois (vale para o dia certo)
+    const alvoFlex = C.diaAlvo(m, d);
+    const conta = (m.weekdays.includes(dow) || !!alvoFlex) && d >= m.start_date;
+    const ok = conta && C.cumpriu(m, C.valor(m, estado.mapa, alvoFlex || d)) && (m.kind === 'numeric' ? e.num_value != null : true);
     if (ok) okAgora.add(m.id);
     let corpo, alvo;
     if (m.kind === 'numeric') {
@@ -337,7 +339,7 @@ function renderHoje(trocouDia) {
         </div>
         <div class="barra"><i style="width:${fracao}%"></i></div>`;
     } else {
-      alvo = `${textoDias(m.weekdays)}`;
+      alvo = alvoFlex && alvoFlex !== d ? `${textoDias(m.weekdays)} · vale para ${ddmm(alvoFlex)}` : `${textoDias(m.weekdays)}`;
       const v = e.bool_value;
       const padrao = v == null ? m.default_value : null;   // botão tracejado = valor assumido
       // Verde quando a resposta é a de sucesso, vermelho quando não
