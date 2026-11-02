@@ -9,7 +9,7 @@
       { csv: 'leitura',  name: 'Leitura',  question: 'Páginas lidas', kind: 'numeric', unit: 'páginas',  step: 1,    target: 10, weekdays: [1,2,3,4,5],     pct_mode: 'sum' },
       { csv: 'frutas',   name: 'Frutas',   question: 'Frutas',        kind: 'numeric', unit: 'unidades', step: 1,    target: 2,  weekdays: [0,1,2,3,4,5,6], pct_mode: 'days' },
       { csv: 'agua',     name: 'Água',     question: 'Água',          kind: 'numeric', unit: 'litros',   step: 0.5, target: 3,  weekdays: [0,1,2,3,4,5,6], pct_mode: 'days' },
-      { csv: 'reflexao', name: 'Reflexão', question: 'Reflexão',      kind: 'numeric', unit: 'minutos',  step: 5,    target: 20, weekdays: [1,2,3,4,5],     pct_mode: 'days' },
+      { csv: 'reflexao', name: 'Reflexão', question: 'Tempo pra refletir?', kind: 'boolean', success_value: true, weekdays: [1,2,3,4,5],     pct_mode: 'days' },
       { csv: 'organizacao', name: 'Organizar a semana', question: 'Organizei a semana?', kind: 'boolean', success_value: true,  weekdays: [0], pct_mode: 'days' },
       { csv: 'roi_unhas',   name: 'Não roer unhas',     question: 'Roí unhas?',          kind: 'boolean', success_value: false, default_value: false, feeling_on: true, weekdays: [0,1,2,3,4,5,6], pct_mode: 'answered' }
     ],
@@ -54,7 +54,7 @@
         if (v == null || v === '') continue;
         const e = { goal_id: meta.id, day: dia, num_value: null, bool_value: null, feeling: null };
         if (meta.kind === 'numeric') e.num_value = Number(v.replace(',', '.'));
-        else e.bool_value = /^s/i.test(v);
+        else e.bool_value = /^\d/.test(v) ? Number(v.replace(',', '.')) > 0 : /^s/i.test(v);   // número (ex.: minutos antigos) vira sim se > 0
         if (meta.feeling_on != null && e.bool_value === meta.feeling_on && reg.sentimento) e.feeling = reg.sentimento;
         entries.push(e);
       }
