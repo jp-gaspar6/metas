@@ -421,26 +421,32 @@ $('#ne-itens').addEventListener('keydown', ev => {
 // Gesto "voltar" do Android (deslizar da borda): fecha a nota em vez de sair do app
 addEventListener('popstate', () => { if (editando) fecharNota(true); });
 
-// Arrastar itens pela alça ⠿ (só os não marcados, como no Keep)
-let arrastoItem = null;
+// Arrastar itens pela alça ⠿ (só os não marcados, como no Keep): o item segue o dedo
+// e os outros abrem espaço assim que ele passa da metade do vizinho
+let arrastoItem = null, pegaY = 0, deslocY = 0;
 $('#ne-itens').addEventListener('pointerdown', ev => {
   const alca = ev.target.closest('.ne-alca');
   if (!alca || !alca.textContent) return;
   ev.preventDefault();
   arrastoItem = alca.closest('.ne-item');
+  pegaY = ev.clientY - arrastoItem.getBoundingClientRect().top;
+  deslocY = 0;
   arrastoItem.classList.add('movendo');
   alca.setPointerCapture(ev.pointerId);
 });
+function posicionar(y) {
+  const topoNatural = arrastoItem.getBoundingClientRect().top - deslocY;
+  deslocY = y - pegaY - topoNatural;
+  arrastoItem.style.transform = `translateY(${deslocY}px)`;
+}
 $('#ne-itens').addEventListener('pointermove', ev => {
   if (!arrastoItem) return;
-  const alvo = [...$('#ne-itens').querySelectorAll('.ne-item:not(.feito)')].find(el => {
-    const r = el.getBoundingClientRect();
-    return el !== arrastoItem && ev.clientY > r.top && ev.clientY < r.bottom;
-  });
-  if (alvo) {
-    const r = alvo.getBoundingClientRect();
-    alvo.parentNode.insertBefore(arrastoItem, ev.clientY < r.top + r.height / 2 ? alvo : alvo.nextSibling);
-  }
+  posicionar(ev.clientY);
+  const r = arrastoItem.getBoundingClientRect(), meio = r.top + r.height / 2;
+  const ant = arrastoItem.previousElementSibling, prox = arrastoItem.nextElementSibling;
+  const meioDe = el => { const q = el.getBoundingClientRect(); return q.top + q.height / 2; };
+  if (ant?.matches('.ne-item:not(.feito)') && meio < meioDe(ant)) { ant.before(arrastoItem); posicionar(ev.clientY); }
+  else if (prox?.matches('.ne-item:not(.feito)') && meio > meioDe(prox)) { prox.after(arrastoItem); posicionar(ev.clientY); }
   // Rola a lista perto das bordas
   const caixa = $('#ne-itens').getBoundingClientRect();
   if (ev.clientY < caixa.top + 40) $('#ne-itens').scrollTop -= 10;
@@ -449,6 +455,7 @@ $('#ne-itens').addEventListener('pointermove', ev => {
 function soltarItem() {
   if (!arrastoItem) return;
   arrastoItem.classList.remove('movendo');
+  arrastoItem.style.transform = '';
   arrastoItem = null;
   const ordem = [...$('#ne-itens').querySelectorAll('.ne-item:not(.feito)')].map(el => el.dataset.id);
   const porId = Object.fromEntries(editando.items.map(i => [i.id, i]));
