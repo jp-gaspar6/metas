@@ -312,8 +312,13 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .ne-cores { display: flex; gap: 8px; flex-wrap: wrap; }
 .ne-cor { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--borda); background: var(--c, var(--cartao)); }
 .ne-cor.sel { border-color: var(--texto); }
-.ne-menu { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
-.ne-menu button { text-align: left; background: transparent; border: 0; padding: 10px 6px; font-size: 16px; color: var(--texto); }
+.nota-editor { position: relative; }
+.ne-menu { position: absolute; right: 14px; bottom: 74px; z-index: 30; min-width: 210px; display: flex; flex-direction: column;
+  background: var(--cartao); border: 1px solid var(--borda); border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); padding: 6px 0; }
+.ne-menu[hidden] { display: none; }
+.ne-menu button { display: flex; align-items: center; gap: 14px; text-align: left; background: transparent; border: 0; border-radius: 0;
+  padding: 14px 18px; font-size: 16px; color: var(--texto); }
+.ne-menu button:active { background: color-mix(in srgb, var(--texto) 10%, transparent); }
 .ne-menu .perigo { color: var(--vermelho); }
 .notas-selbar { position: fixed; top: 0; left: 0; right: 0; z-index: 900; background: var(--cartao); padding: 10px 16px; box-shadow: var(--sombra); }
 .notas-selbar b { font-size: 20px; }
@@ -324,7 +329,7 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 #ne-corpo { resize: none; min-height: 140px; padding: 10px 12px; font-size: 17px; line-height: 1.5; }
 .ne-itens { display: flex; flex-direction: column; gap: 0; }
 .ne-item { display: flex; align-items: center; gap: 14px; min-height: 48px; }
-.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; padding: 8px 2px; box-shadow: none; }
+.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; padding: 8px 2px; box-shadow: none; resize: none; overflow: hidden; overflow-wrap: anywhere; }
 .nota-editor .ne-item .ne-txt:focus { outline: none; box-shadow: none; border: 0; }
 .ne-item .ne-tirar { opacity: 0; }
 .ne-item:focus-within .ne-tirar, .ne-item:hover .ne-tirar { opacity: 1; }

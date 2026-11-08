@@ -230,15 +230,18 @@ function renderEditor() {
   if (lista) {
     const linha = i => `<div class="ne-item ${i.done ? 'feito' : ''}" data-id="${i.id}">
         <input type="checkbox" class="ne-marca" ${i.done ? 'checked' : ''} aria-label="Marcar item">
-        <input class="ne-txt" value="${esc(i.t)}" placeholder="Item">
+        <textarea class="ne-txt" rows="1" placeholder="Item">${esc(i.t)}</textarea>
         <button class="icone ne-tirar" aria-label="Remover item">×</button>
       </div>`;
     const abertos = n.items.filter(i => !i.done), feitos = n.items.filter(i => i.done);
     $('#ne-itens').innerHTML = abertos.map(linha).join('') +
       `<button class="link ne-add">+ Item da lista</button>` +
       (feitos.length ? `<div class="ne-sep">${feitos.length} ${feitos.length > 1 ? 'itens marcados' : 'item marcado'}</div>` + feitos.map(linha).join('') : '');
+    $('#ne-itens').querySelectorAll('.ne-txt').forEach(ajustarAltura);
   }
 }
+// Item longo quebra linha (como no Keep): a caixa cresce com o texto
+function ajustarAltura(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 
 // Desfazer/refazer: fotos da nota; digitação seguida vira um passo só
 let historico = [], posHist = 0, ultimaFoto = 0;
@@ -324,7 +327,8 @@ $('#ne-cores').addEventListener('click', ev => {
   $('#ne-cores').hidden = true;
   salvarNota(); renderEditor();
 });
-$('#ne-mais').onclick = () => { $('#ne-cores').hidden = true; $('#ne-menu').hidden = !$('#ne-menu').hidden; };
+$('#ne-mais').onclick = ev => { ev.stopPropagation(); $('#ne-cores').hidden = true; $('#ne-menu').hidden = !$('#ne-menu').hidden; };
+$('.nota-editor').addEventListener('click', ev => { if (!ev.target.closest('#ne-menu')) $('#ne-menu').hidden = true; });
 $('#ne-copiar').onclick = () => {
   salvarNota();
   const copia = { ...JSON.parse(JSON.stringify(editando)), id: crypto.randomUUID(), pinned: false,
@@ -351,7 +355,7 @@ $('#ne-apagar').onclick = async () => {
 // Itens da lista
 const itemDe = el => editando.items.find(i => i.id === el.closest('.ne-item').dataset.id);
 $('#ne-itens').addEventListener('input', ev => {
-  if (ev.target.classList.contains('ne-txt')) { itemDe(ev.target).t = ev.target.value; salvarNota(); sugerir(ev.target); }
+  if (ev.target.classList.contains('ne-txt')) { ajustarAltura(ev.target); itemDe(ev.target).t = ev.target.value; salvarNota(); sugerir(ev.target); }
 });
 
 // Sugestão: ao digitar algo que já está na lista, oferece reaproveitar o item (sem duplicar)
