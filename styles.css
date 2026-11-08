@@ -329,7 +329,7 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 #ne-corpo { resize: none; min-height: 140px; padding: 10px 12px; font-size: 17px; line-height: 1.5; }
 .ne-itens { display: flex; flex-direction: column; gap: 0; }
 .ne-item { display: flex; align-items: center; gap: 14px; min-height: 48px; }
-.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; padding: 8px 2px; box-shadow: none; resize: none; overflow: hidden; overflow-wrap: anywhere; }
+.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; padding: 8px 2px; box-shadow: none; resize: none; overflow: hidden; overflow-wrap: anywhere; min-height: calc(1.35em + 16px); }
 .nota-editor .ne-item .ne-txt:focus { outline: none; box-shadow: none; border: 0; }
 .ne-item .ne-tirar { opacity: 0; }
 .ne-item:focus-within .ne-tirar, .ne-item:hover .ne-tirar { opacity: 1; }

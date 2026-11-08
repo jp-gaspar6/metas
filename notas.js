@@ -207,6 +207,7 @@ function abrirNota(n, kind) {
   $('#ne-cores').hidden = $('#ne-menu').hidden = true;
   renderEditor();
   $('#editor-nota').hidden = false;
+  $('#ne-itens').querySelectorAll('.ne-txt').forEach(ajustarAltura);   // só dá para medir com o editor visível
   history.pushState({ nota: true }, '');
   if (notaNova) (kind === 'list' ? $('#ne-itens input.ne-txt') : $('#ne-corpo')).focus();
 }
@@ -241,7 +242,10 @@ function renderEditor() {
   }
 }
 // Item longo quebra linha (como no Keep): a caixa cresce com o texto
-function ajustarAltura(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+function ajustarAltura(t) {
+  if (!t.offsetParent) return;   // escondido: mede errado (altura 0)
+  t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px';
+}
 
 // Desfazer/refazer: fotos da nota; digitação seguida vira um passo só
 let historico = [], posHist = 0, ultimaFoto = 0;
