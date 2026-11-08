@@ -338,7 +338,7 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .ne-item:focus-within .ne-tirar, .ne-item:hover .ne-tirar { opacity: 1; }
 .ne-item.feito .ne-txt { text-decoration: line-through; color: var(--suave); }
 .ne-marca { width: 22px; height: 22px; accent-color: var(--primaria); margin: 0; flex: none; }
-.ne-tirar { width: 36px; height: 36px; background: transparent; border-color: transparent; color: var(--suave); font-size: 22px; }
+.ne-tirar { width: 36px; height: 36px; background: transparent; border-color: transparent; color: var(--suave); font-size: 22px; padding: 0; display: grid; place-items: center; }
 .ne-add { align-self: flex-start; margin: 4px 0; }
 .ne-sep { font-size: 15px; color: var(--suave); border-top: 1px solid var(--borda); padding-top: 8px; margin-top: 6px; }
 .link.perigo { color: var(--vermelho); }

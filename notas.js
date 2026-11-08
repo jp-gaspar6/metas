@@ -232,7 +232,7 @@ function renderEditor() {
     const linha = i => `<div class="ne-item ${i.done ? 'feito' : ''}" data-id="${i.id}">
         <input type="checkbox" class="ne-marca" ${i.done ? 'checked' : ''} aria-label="Marcar item">
         <textarea class="ne-txt" rows="1" placeholder="Item">${esc(i.t)}</textarea>
-        <button class="icone ne-tirar" aria-label="Remover item">×</button>
+        <button class="icone ne-tirar" aria-label="Remover item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>`;
     const abertos = n.items.filter(i => !i.done), feitos = n.items.filter(i => i.done);
     $('#ne-itens').innerHTML = abertos.map(linha).join('') +
