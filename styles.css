@@ -328,8 +328,11 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .nota-fantasma { position: fixed; z-index: 2000; pointer-events: none; margin: 0; box-shadow: var(--sombra); transform: scale(1.04); }
 #ne-corpo { resize: none; min-height: 140px; padding: 10px 12px; font-size: 17px; line-height: 1.5; }
 .ne-itens { display: flex; flex-direction: column; gap: 0; }
-.ne-item { display: flex; align-items: center; gap: 14px; min-height: 48px; }
-.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; padding: 8px 2px; box-shadow: none; resize: none; overflow: hidden; overflow-wrap: anywhere; min-height: calc(1.35em + 16px); }
+/* Itens alinhados pela primeira linha; o campo ocupa a altura toda da linha para facilitar o toque */
+.ne-item { display: flex; align-items: flex-start; gap: 14px; cursor: text; }
+.ne-item .ne-marca { margin-top: 13px; }
+.ne-item .ne-tirar { margin-top: 6px; }
+.ne-item .ne-txt { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; padding: 13px 2px; box-shadow: none; resize: none; overflow: hidden; overflow-wrap: anywhere; min-height: calc(1.35em + 26px); }
 .nota-editor .ne-item .ne-txt:focus { outline: none; box-shadow: none; border: 0; }
 .ne-item .ne-tirar { opacity: 0; }
 .ne-item:focus-within .ne-tirar, .ne-item:hover .ne-tirar { opacity: 1; }

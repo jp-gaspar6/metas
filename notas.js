@@ -390,6 +390,13 @@ $('#ne-itens').addEventListener('change', ev => {
   if (ev.target.classList.contains('ne-marca')) { itemDe(ev.target).done = ev.target.checked; renderEditor(); salvarNota(); }
 });
 $('#ne-itens').addEventListener('click', ev => {
+  // Toque em qualquer parte da linha (fora do quadradinho e do ×) edita o item, cursor no fim
+  const linha = ev.target.closest('.ne-item');
+  if (linha && !ev.target.closest('input, textarea, button')) {
+    const t = linha.querySelector('.ne-txt');
+    t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+    return;
+  }
   if (ev.target.closest('.ne-tirar')) {
     const it = itemDe(ev.target);
     editando.items = editando.items.filter(i => i !== it);
