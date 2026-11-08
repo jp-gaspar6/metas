@@ -347,3 +347,6 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
   border-radius: 10px; box-shadow: var(--sombra); padding: 4px 0; }
 .ne-sug button { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; background: transparent; border: 0;
   padding: 12px 14px; font-size: 16px; color: var(--texto); }
+.ne-alca { flex: none; width: 20px; margin: 10px -8px 0 -6px; font-size: 22px; line-height: 1; color: var(--suave); text-align: center;
+  touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; padding: 2px 0; }
+.ne-item.movendo { background: color-mix(in srgb, var(--texto) 8%, transparent); border-radius: 10px; box-shadow: var(--sombra); }

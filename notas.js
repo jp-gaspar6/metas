@@ -230,6 +230,7 @@ function renderEditor() {
     { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
   if (lista) {
     const linha = i => `<div class="ne-item ${i.done ? 'feito' : ''}" data-id="${i.id}">
+        ${i.done ? '<span class="ne-alca"></span>' : '<span class="ne-alca" aria-label="Arrastar item">⠿</span>'}
         <input type="checkbox" class="ne-marca" ${i.done ? 'checked' : ''} aria-label="Marcar item">
         <textarea class="ne-txt" rows="1" placeholder="Item">${esc(i.t)}</textarea>
         <button class="icone ne-tirar" aria-label="Remover item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -392,7 +393,7 @@ $('#ne-itens').addEventListener('change', ev => {
 $('#ne-itens').addEventListener('click', ev => {
   // Toque em qualquer parte da linha (fora do quadradinho e do ×) edita o item, cursor no fim
   const linha = ev.target.closest('.ne-item');
-  if (linha && !ev.target.closest('input, textarea, button')) {
+  if (linha && !ev.target.closest('input, textarea, button, .ne-alca')) {
     const t = linha.querySelector('.ne-txt');
     t.focus(); t.setSelectionRange(t.value.length, t.value.length);
     return;
@@ -419,3 +420,40 @@ $('#ne-itens').addEventListener('keydown', ev => {
 
 // Gesto "voltar" do Android (deslizar da borda): fecha a nota em vez de sair do app
 addEventListener('popstate', () => { if (editando) fecharNota(true); });
+
+// Arrastar itens pela alça ⠿ (só os não marcados, como no Keep)
+let arrastoItem = null;
+$('#ne-itens').addEventListener('pointerdown', ev => {
+  const alca = ev.target.closest('.ne-alca');
+  if (!alca || !alca.textContent) return;
+  ev.preventDefault();
+  arrastoItem = alca.closest('.ne-item');
+  arrastoItem.classList.add('movendo');
+  alca.setPointerCapture(ev.pointerId);
+});
+$('#ne-itens').addEventListener('pointermove', ev => {
+  if (!arrastoItem) return;
+  const alvo = [...$('#ne-itens').querySelectorAll('.ne-item:not(.feito)')].find(el => {
+    const r = el.getBoundingClientRect();
+    return el !== arrastoItem && ev.clientY > r.top && ev.clientY < r.bottom;
+  });
+  if (alvo) {
+    const r = alvo.getBoundingClientRect();
+    alvo.parentNode.insertBefore(arrastoItem, ev.clientY < r.top + r.height / 2 ? alvo : alvo.nextSibling);
+  }
+  // Rola a lista perto das bordas
+  const caixa = $('#ne-itens').getBoundingClientRect();
+  if (ev.clientY < caixa.top + 40) $('#ne-itens').scrollTop -= 10;
+  else if (ev.clientY > caixa.bottom - 40) $('#ne-itens').scrollTop += 10;
+});
+function soltarItem() {
+  if (!arrastoItem) return;
+  arrastoItem.classList.remove('movendo');
+  arrastoItem = null;
+  const ordem = [...$('#ne-itens').querySelectorAll('.ne-item:not(.feito)')].map(el => el.dataset.id);
+  const porId = Object.fromEntries(editando.items.map(i => [i.id, i]));
+  editando.items = [...ordem.map(id => porId[id]), ...editando.items.filter(i => i.done)];
+  renderEditor(); salvarNota();
+}
+$('#ne-itens').addEventListener('pointerup', soltarItem);
+$('#ne-itens').addEventListener('pointercancel', soltarItem);
