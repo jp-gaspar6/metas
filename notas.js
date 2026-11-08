@@ -120,7 +120,7 @@ let toque = null, ignorarClique = false;
 function iniciarToque(ev) {
   const c = ev.target.closest('.nota-card');
   if (!c || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
-  toque = { c, id: c.dataset.id, x: ev.clientX, y: ev.clientY, armado: false, fantasma: null };
+  toque = { tipo: ev.pointerType, c, id: c.dataset.id, x: ev.clientX, y: ev.clientY, armado: false, fantasma: null };
   toque.timer = setTimeout(() => {
     if (!toque) return;
     toque.armado = true;
@@ -135,8 +135,11 @@ function moverToque(ev) {
   if (!toque) return;
   const dx = ev.clientX - toque.x, dy = ev.clientY - toque.y;
   if (!toque.armado) {
-    if (Math.hypot(dx, dy) > 10) { clearTimeout(toque.timer); toque = null; }   // é rolagem
-    return;
+    if (Math.hypot(dx, dy) <= 10) return;
+    clearTimeout(toque.timer);
+    // Mouse: arrastar já move o cartão (sem precisar segurar). Dedo: é rolagem
+    if (ev.pointerType !== 'mouse') { toque = null; return; }
+    toque.armado = true;
   }
   if (!toque.fantasma) {
     if (Math.hypot(dx, dy) < 8) return;
