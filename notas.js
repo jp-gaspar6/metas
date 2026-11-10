@@ -435,7 +435,7 @@ $('#ne-itens').addEventListener('pointerdown', ev => {
   pegaY = ev.clientY - arrastoItem.getBoundingClientRect().top;
   deslocY = 0;
   arrastoItem.classList.add('movendo');
-  alca.setPointerCapture(ev.pointerId);
+  try { alca.setPointerCapture(ev.pointerId); } catch { /* sem captura: os ouvintes da janela cuidam */ }
 });
 function posicionar(y) {
   const topoNatural = arrastoItem.getBoundingClientRect().top - deslocY;
@@ -465,5 +465,8 @@ function soltarItem() {
   editando.items = [...ordem.map(id => porId[id]), ...editando.items.filter(i => i.done)];
   renderEditor(); salvarNota();
 }
-$('#ne-itens').addEventListener('pointerup', soltarItem);
-$('#ne-itens').addEventListener('pointercancel', soltarItem);
+// Solta em qualquer caso (dedo fora da lista, gesto cancelado pelo sistema, captura perdida),
+// senão o item fica "voando" sem encaixar
+addEventListener('pointerup', soltarItem);
+addEventListener('pointercancel', soltarItem);
+$('#ne-itens').addEventListener('lostpointercapture', soltarItem);
