@@ -435,14 +435,13 @@ $('#ne-itens').addEventListener('pointerdown', ev => {
   pegaY = ev.clientY - arrastoItem.getBoundingClientRect().top;
   deslocY = 0;
   arrastoItem.classList.add('movendo');
-  try { alca.setPointerCapture(ev.pointerId); } catch { /* sem captura: os ouvintes da janela cuidam */ }
 });
 function posicionar(y) {
   const topoNatural = arrastoItem.getBoundingClientRect().top - deslocY;
   deslocY = y - pegaY - topoNatural;
   arrastoItem.style.transform = `translateY(${deslocY}px)`;
 }
-$('#ne-itens').addEventListener('pointermove', ev => {
+addEventListener('pointermove', ev => {
   if (!arrastoItem) return;
   posicionar(ev.clientY);
   const r = arrastoItem.getBoundingClientRect(), meio = r.top + r.height / 2;
@@ -465,8 +464,7 @@ function soltarItem() {
   editando.items = [...ordem.map(id => porId[id]), ...editando.items.filter(i => i.done)];
   renderEditor(); salvarNota();
 }
-// Solta em qualquer caso (dedo fora da lista, gesto cancelado pelo sistema, captura perdida),
-// senão o item fica "voando" sem encaixar
+// Solta em qualquer lugar da tela ou se o sistema cancelar o gesto; senão o item fica "voando".
+// (Não usa captura do ponteiro: mover o item no DOM a desfaz no meio do arrasto.)
 addEventListener('pointerup', soltarItem);
 addEventListener('pointercancel', soltarItem);
-$('#ne-itens').addEventListener('lostpointercapture', soltarItem);
