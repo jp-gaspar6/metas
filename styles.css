@@ -350,3 +350,10 @@ body.leitor #cards input, body.leitor #cards select { opacity: 1; }
 .ne-alca { flex: none; width: 28px; margin: 0 -8px 0 0; padding: 12px 0; font-size: 22px; line-height: 1; color: var(--suave); text-align: center;
   touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 .ne-item.movendo { position: relative; z-index: 10; background: var(--cartao); background-image: linear-gradient(color-mix(in srgb, var(--texto) 6%, transparent), color-mix(in srgb, var(--texto) 6%, transparent)); --x: color-mix(in srgb, var(--texto) 8%, transparent); border-radius: 10px; box-shadow: var(--sombra); }
+
+.atalhos { display: flex; gap: 10px; margin: 0 0 14px; }
+.atalhos button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 16px;
+  border: 1px solid var(--borda); background: var(--cartao); color: inherit; font-size: 15px; font-weight: 600; }
+.atalhos button b { font-size: 18px; font-weight: 400; }
+.sub-topo { display: flex; align-items: center; gap: 12px; }
+.sub-topo h2 { margin: 0; }

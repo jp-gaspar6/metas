@@ -66,6 +66,10 @@
         </div>
         <div id="hero-anel" class="anel"><span id="hero-pct"></span></div>
       </div>
+      <div class="atalhos">
+        <button data-ir="semana"><b>📅</b>Período</button>
+        <button data-ir="graficos"><b>📈</b>Gráficos</button>
+      </div>
       <nav class="dia-nav">
         <button id="dia-ant" class="seta" aria-label="Semana anterior"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
         <div class="dia-centro">
@@ -100,7 +104,7 @@
 
     <!-- Semana / Mês (mesma tela, agregação diferente) -->
     <section id="tela-periodo" class="tela" hidden>
-      <h2 id="periodo-titulo"></h2>
+      <div class="sub-topo"><button class="seta voltar-hoje" aria-label="Voltar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><h2 id="periodo-titulo"></h2></div>
       <!-- Escolhe entre resumo semanal, mensal, dia a dia e comparação por dia da semana -->
       <div id="periodo-visoes" class="chips segment">
         <button data-visao="semanas" class="sel">Semanas</button>
@@ -115,7 +119,7 @@
 
     <!-- Gráficos -->
     <section id="tela-graficos" class="tela" hidden>
-      <h2>Gráficos</h2>
+      <div class="sub-topo"><button class="seta voltar-hoje" aria-label="Voltar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><h2>Gráficos</h2></div>
       <div id="graf-metas" class="chips"></div>
       <div id="graf-periodo" class="chips segment">
         <button data-dias="30" class="sel">30 dias</button>
@@ -272,8 +276,6 @@
 
   <nav id="abas" class="abas" hidden>
     <button data-aba="hoje" class="ativa"><b>☀️</b>Hoje</button>
-    <button data-aba="semana"><b>📅</b>Período</button>
-    <button data-aba="graficos"><b>📈</b>Gráficos</button>
     <button data-aba="ideias"><b>💡</b>Ideias</button>
     <button data-aba="anotacoes"><b>📝</b>Notas</button>
     <button data-aba="config"><b>⚙️</b>Ajustes</button>

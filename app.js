@@ -237,7 +237,8 @@ function mostrarTela(aba) {
   for (const t of ['login', 'senha', 'hoje', 'periodo', 'graficos', 'ideias', 'anotacoes', 'config', 'breve']) $('#tela-' + t).hidden = true;
   if (aba === 'login' || aba === 'senha') { $('#tela-' + aba).hidden = false; $('#abas').hidden = true; return; }
   $('#abas').hidden = false;
-  document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
+  const sub = aba === 'semana' || aba === 'graficos';
+  document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === (sub ? 'hoje' : aba)));
   document.querySelector('main').classList.toggle('largo', aba === 'semana');
   if (aba === 'hoje') { $('#tela-hoje').hidden = false; renderHoje(true); }
   else if (aba === 'semana') { $('#tela-periodo').hidden = false; renderPeriodo(); }
@@ -247,7 +248,11 @@ function mostrarTela(aba) {
   else if (aba === 'config' && !estado.leitor) { $('#tela-config').hidden = false; renderAjustes(); }
   else $('#tela-breve').hidden = false;
 }
-document.querySelectorAll('#abas button').forEach(b => b.onclick = () => mostrarTela(b.dataset.aba));
+document.querySelectorAll('#abas button').forEach(b => b.onclick = () => { if (history.state?.sub) history.replaceState(null, ''); mostrarTela(b.dataset.aba); });
+// Período e Gráficos abrem a partir de Hoje; o gesto de voltar do Android retorna para Hoje
+document.querySelectorAll('.atalhos button').forEach(b => b.onclick = () => { history.pushState({ sub: true }, ''); mostrarTela(b.dataset.ir); });
+document.querySelectorAll('.voltar-hoje').forEach(b => b.onclick = () => history.state?.sub ? history.back() : mostrarTela('hoje'));
+addEventListener('popstate', () => { if (estado.aba === 'semana' || estado.aba === 'graficos') mostrarTela('hoje'); });
 
 // ---------------------------------------------------------------------
 // Tela Hoje
