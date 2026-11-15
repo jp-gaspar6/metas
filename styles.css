@@ -95,6 +95,19 @@ main.largo { max-width: 1100px; }
 .dia-sub { font-size: 13px; color: var(--suave); text-transform: capitalize; }
 .sobreposto { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 6, 30, .55); display: grid; place-items: center; padding: 16px; }
 .cal-caixa { background: var(--cartao); border-radius: var(--raio); box-shadow: var(--sombra); padding: 16px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+.ck-caixa { max-width: 520px; max-height: calc(100dvh - 32px); }
+.ck-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.ck-conta { color: var(--suave); font-size: 14px; }
+.ck-itens { overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.ck-item { border-bottom: 1px solid var(--borda); padding: 6px 0; }
+.ck-linha { display: flex; align-items: center; gap: 12px; }
+.ck-linha label { flex: 1; display: flex; align-items: center; gap: 12px; font-size: 15px; min-height: 40px; }
+.ck-item.feito label span { text-decoration: line-through; color: var(--suave); }
+.ck-linha input { width: 22px; height: 22px; accent-color: var(--primaria); margin: 0; flex: none; }
+.ck-com { width: 36px; height: 36px; flex: none; background: transparent; border-color: transparent; font-size: 17px; opacity: .45; }
+.ck-com.tem { opacity: 1; }
+.ck-obs { width: 100%; margin: 4px 0 4px 34px; width: calc(100% - 34px); font-size: 14px; }
+.btn-checklist { width: 100%; }
 .cal-topo { display: flex; align-items: center; justify-content: space-between; }
 .cal-topo strong { display: inline-block; }
 .cal-topo strong::first-letter { text-transform: uppercase; }

@@ -346,6 +346,19 @@ function renderHoje(trocouDia) {
     } else {
       alvo = alvoFlex && alvoFlex !== d ? `${textoDias(m.weekdays)} · vale para ${ddmm(alvoFlex)}` : `${textoDias(m.weekdays)}`;
       const v = e.bool_value;
+      if (m.checklist?.length) {
+        // Meta com checklist: o sim vem sozinho quando todos os itens são marcados
+        const ek = estado.mapa[m.id + '|' + (alvoFlex || d)] || {};
+        const feitos = m.checklist.filter(t => ek.checks?.ok?.includes(t)).length;
+        corpo = `<button data-acao="checklist" class="primario btn-checklist">Abrir checklist · ${feitos}/${m.checklist.length}</button>`;
+        const pop = ok && !okAntes.has(m.id) && !trocouDia ? 'pop' : '';
+        return `<div class="card ${conta ? '' : 'esmaecido'} ${ok ? 'ok' : ''} ${pop}" data-id="${m.id}" style="--cor:${corMeta}">
+            <div class="card-topo">
+              <div class="icone-meta">${icone}</div>
+              <div class="card-tit"><span class="card-nome">${m.question || m.name}</span><span class="card-alvo">${alvo}</span></div>
+              ${conta ? '<span class="selo">✓</span>' : '<span class="chip">não conta hoje</span>'}
+            </div>${corpo}</div>`;
+      }
       const padrao = v == null ? m.default_value : null;   // botão tracejado = valor assumido
       // Verde quando a resposta é a de sucesso, vermelho quando não
       const cls = b => (v === b ? 'ativo ' + (b === m.success_value ? 'bom' : 'ruim') : '') + (padrao === b ? ' padrao' : '');
@@ -375,10 +388,11 @@ function renderHoje(trocouDia) {
 
 // Grava um valor de meta no dia selecionado
 // redesenhar = false enquanto o usuário digita (para não perder o foco do campo)
-function gravarEntrada(meta, mudancas, redesenhar = true) {
-  const k = meta.id + '|' + estado.dia;
-  const atual = estado.mapa[k] || { goal_id: meta.id, day: estado.dia, num_value: null, bool_value: null, feeling: null };
-  const linha = { goal_id: meta.id, day: estado.dia, num_value: atual.num_value, bool_value: atual.bool_value, feeling: atual.feeling, ...mudancas };
+function gravarEntrada(meta, mudancas, redesenhar = true, dia = estado.dia) {
+  const k = meta.id + '|' + dia;
+  const atual = estado.mapa[k] || { goal_id: meta.id, day: dia, num_value: null, bool_value: null, feeling: null };
+  const linha = { goal_id: meta.id, day: dia, num_value: atual.num_value, bool_value: atual.bool_value, feeling: atual.feeling, ...mudancas };
+  if (atual.checks != null && !('checks' in mudancas)) linha.checks = atual.checks;
   estado.mapa[k] = linha;
   enfileirar('entries', k, linha);
   if (redesenhar) renderHoje(false);
@@ -412,8 +426,79 @@ $('#cards').addEventListener('click', ev => {
     // Tocar de novo no botão já marcado limpa a resposta
     case 'sim': gravarEntrada(meta, { bool_value: e.bool_value === true ? null : true, feeling: meta.feeling_on === true ? e.feeling : null }); break;
     case 'nao': gravarEntrada(meta, { bool_value: e.bool_value === false ? null : false, feeling: meta.feeling_on === false ? e.feeling : null }); break;
+    case 'checklist': abrirChecklist(meta); break;
   }
 });
+
+// ---- Checklist sobreposto ----
+// O registro vai no dia certo da meta (ex.: domingo), mesmo abrindo 1–2 dias antes/depois.
+// entries.checks = { ok: [itens marcados], obs: { item: comentário } }
+let ck = null;   // { meta, dia }
+function abrirChecklist(meta) {
+  ck = { meta, dia: C.diaAlvo(meta, estado.dia) || estado.dia };
+  $('#ck-titulo').textContent = meta.name;
+  renderChecklist();
+  $('#checklist').hidden = false;
+  history.pushState({ checklist: true }, '');
+}
+function fecharChecklist(doVoltar) {
+  if (!ck) return;
+  ck = null;
+  $('#checklist').hidden = true;
+  if (!doVoltar) history.back();
+  renderHoje(false);
+}
+function checksAtuais() {
+  const c = estado.mapa[ck.meta.id + '|' + ck.dia]?.checks || {};
+  return { ok: [...(c.ok || [])], obs: { ...(c.obs || {}) } };
+}
+function renderChecklist() {
+  const c = checksAtuais(), itens = ck.meta.checklist;
+  $('#ck-conta').textContent = `${itens.filter(t => c.ok.includes(t)).length}/${itens.length} · ${ddmm(ck.dia)}`;
+  $('#ck-itens').innerHTML = itens.map((t, i) => {
+    const feito = c.ok.includes(t), obs = c.obs[t] || '';
+    return `<div class="ck-item ${feito ? 'feito' : ''}" data-i="${i}">
+        <div class="ck-linha">
+          <label><input type="checkbox" ${feito ? 'checked' : ''}><span>${esc(t)}</span></label>
+          <button class="ck-com ${obs ? 'tem' : ''}" aria-label="Comentário">💬</button>
+        </div>
+        <textarea class="ck-obs" rows="2" placeholder="Comentário…" ${obs ? '' : 'hidden'}>${esc(obs)}</textarea>
+      </div>`;
+  }).join('');
+}
+function gravarChecks(c) {
+  const todos = ck.meta.checklist.every(t => c.ok.includes(t));
+  gravarEntrada(ck.meta, { checks: c, bool_value: todos ? true : null }, false, ck.dia);
+}
+$('#ck-itens').addEventListener('change', ev => {
+  if (ev.target.type !== 'checkbox') return;
+  const t = ck.meta.checklist[ev.target.closest('.ck-item').dataset.i];
+  const c = checksAtuais();
+  c.ok = c.ok.filter(x => x !== t);
+  if (ev.target.checked) c.ok.push(t);
+  gravarChecks(c);
+  ev.target.closest('.ck-item').classList.toggle('feito', ev.target.checked);
+  $('#ck-conta').textContent = `${ck.meta.checklist.filter(x => c.ok.includes(x)).length}/${ck.meta.checklist.length} · ${ddmm(ck.dia)}`;
+});
+$('#ck-itens').addEventListener('input', ev => {
+  if (!ev.target.classList.contains('ck-obs')) return;
+  const item = ev.target.closest('.ck-item');
+  const t = ck.meta.checklist[item.dataset.i];
+  const c = checksAtuais();
+  if (ev.target.value.trim()) c.obs[t] = ev.target.value; else delete c.obs[t];
+  gravarChecks(c);
+  item.querySelector('.ck-com').classList.toggle('tem', !!ev.target.value.trim());
+});
+$('#ck-itens').addEventListener('click', ev => {
+  const b = ev.target.closest('.ck-com');
+  if (!b) return;
+  const ta = b.closest('.ck-item').querySelector('.ck-obs');
+  ta.hidden = !ta.hidden;
+  if (!ta.hidden) ta.focus();
+});
+$('#ck-fechar').addEventListener('click', () => fecharChecklist(false));
+$('#checklist').addEventListener('click', ev => { if (ev.target.id === 'checklist') fecharChecklist(false); });
+addEventListener('popstate', () => { if (ck) fecharChecklist(true); });
 $('#cards').addEventListener('change', ev => {
   const el = ev.target;
   const meta = estado.metas.find(m => m.id === el.closest('.card').dataset.id);
