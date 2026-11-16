@@ -767,4 +767,13 @@ atualizarAvisoOffline();
 // Service worker: permite instalar o app e abri-lo sem internet
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW não registrado', e)));
+  // Quando uma versão nova assume, recarrega uma vez para já usar o código novo (não na primeira instalação)
+  const tinhaVersao = !!navigator.serviceWorker.controller;
+  let recarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!tinhaVersao || recarregou) return;
+    // Não recarrega com uma nota ou o checklist abertos, para não perder o que está sendo digitado
+    if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    recarregou = true; location.reload();
+  });
 }
