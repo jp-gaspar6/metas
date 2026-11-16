@@ -182,7 +182,7 @@ $('#form-troca-senha').onsubmit = async ev => {
 $('#btn-exportar').onclick = () => {
   if (!window.XLSX) return alert('A biblioteca do Excel ainda não carregou. Tente de novo em alguns segundos.');
   const hoje = C.hoje();
-  const metas = estado.metas;
+  const metas = estado.todas;   // inclui metas pausadas, para não perder o histórico delas
   const inicio = metas.reduce((m, g) => g.start_date < m ? g.start_date : m, hoje);
   const metaSent = metas.find(m => m.feeling_on != null);
 
@@ -227,6 +227,19 @@ $('#btn-exportar').onclick = () => {
     id: n.id, 'Título': n.title || '', Tipo: n.kind, Texto: n.body || '', Itens: JSON.stringify(n.items || []),
     Fixada: sn(n.pinned), Arquivada: sn(n.archived), 'Criada em': n.created_at, 'Atualizada em': n.updated_at || n.created_at
   })), { header: ['id', 'Título', 'Tipo', 'Texto', 'Itens', 'Fixada', 'Arquivada', 'Criada em', 'Atualizada em'] }), 'Notas');
+  // Checklist: uma linha por item de cada semana, com o comentário
+  const ck = [];
+  for (const e of Object.values(estado.mapa)) {
+    const m = estado.todas.find(g => g.id === e.goal_id);
+    if (!m || !e.checks) continue;
+    const itens = [...new Set([...(m.checklist || []), ...(e.checks.ok || []), ...Object.keys(e.checks.obs || {})])];
+    for (const t of itens) {
+      const feito = (e.checks.ok || []).includes(t), obs = (e.checks.obs || {})[t] || '';
+      if (feito || obs) ck.push({ Data: e.day, Meta: m.name, Item: t, Feito: sn(feito), 'Comentário': obs });
+    }
+  }
+  ck.sort((a, b) => b.Data.localeCompare(a.Data));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ck, { header: ['Data', 'Meta', 'Item', 'Feito', 'Comentário'] }), 'Checklist');
   XLSX.writeFile(wb, `metas-${hoje}.xlsx`);
 };
 
@@ -276,6 +289,22 @@ function lerBackup(wb) {
     return { id: txt(l.id), kind: txt(l.Tipo) === 'list' ? 'list' : 'text', title: txt(l['Título']), body: txt(l.Texto), items: itens,
       pinned: sim(l.Fixada), archived: sim(l.Arquivada), created_at: txt(l['Criada em']) || agora, updated_at: txt(l['Atualizada em']) || agora };
   });
+  // Checklist: junta os itens de volta no registro do dia (entries.checks)
+  for (const l of aba('Checklist')) {
+    const dia = typeof l.Data === 'number' ? XLSX.SSF.format('yyyy-mm-dd', l.Data) : txt(l.Data);
+    const meta = estado.todas.find(m => m.name === txt(l.Meta));
+    const item = txt(l.Item);
+    if (!meta || !item || !/^\d{4}-\d{2}-\d{2}$/.test(dia)) continue;
+    let e = r.entries.find(x => x.goal_id === meta.id && x.day === dia);
+    if (!e) {
+      const atual = estado.mapa[meta.id + '|' + dia] || {};
+      e = { goal_id: meta.id, day: dia, num_value: null, bool_value: atual.bool_value ?? null, feeling: atual.feeling ?? null };
+      r.entries.push(e);
+    }
+    e.checks = e.checks || { ok: [], obs: {} };
+    if (sim(l.Feito)) e.checks.ok.push(item);
+    if (txt(l['Comentário'])) e.checks.obs[item] = txt(l['Comentário']);
+  }
   return { r, porCol, ignoradas };
 }
 
