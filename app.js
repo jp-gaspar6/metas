@@ -350,7 +350,7 @@ function renderHoje(trocouDia) {
         // Meta com checklist: o sim vem sozinho quando todos os itens são marcados
         const ek = estado.mapa[m.id + '|' + (alvoFlex || d)] || {};
         const feitos = m.checklist.filter(t => ek.checks?.ok?.includes(t)).length;
-        corpo = `<button data-acao="checklist" class="primario btn-checklist">Abrir checklist · ${feitos}/${m.checklist.length}</button>`;
+        corpo = `<button data-acao="checklist" class="btn-checklist" style="--p:${Math.round(feitos / m.checklist.length * 100)}%">Abrir checklist</button>`;
         const pop = ok && !okAntes.has(m.id) && !trocouDia ? 'pop' : '';
         return `<div class="card ${conta ? '' : 'esmaecido'} ${ok ? 'ok' : ''} ${pop}" data-id="${m.id}" style="--cor:${corMeta}">
             <div class="card-topo">
