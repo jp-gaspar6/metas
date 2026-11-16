@@ -42,6 +42,9 @@ function formMeta(m, i) {
       <label data-so="boolean">Resposta de sucesso<select name="success_value">${opt('true', 'Sim', m.success_value)}${opt('false', 'Não', m.success_value)}</select></label>
       <label data-so="boolean">Dia em branco vale<select name="default_value">${opt('', 'Nada (em branco)', m.default_value ?? '')}${opt('true', 'Sim', m.default_value)}${opt('false', 'Não', m.default_value)}</select></label>
       <label data-so="boolean">Pedir sentimento<select name="feeling_on">${opt('', 'Nunca', m.feeling_on ?? '')}${opt('true', 'Quando Sim', m.feeling_on)}${opt('false', 'Quando Não', m.feeling_on)}</select></label>
+      <label class="largura" data-so="boolean">Checklist (um item por linha)
+        <textarea name="checklist" rows="${Math.min(12, Math.max(3, (m.checklist || []).length + 1))}" placeholder="Deixe vazio para usar só Sim / Não">${esc((m.checklist || []).join('\n'))}</textarea>
+        <span class="dica">Com itens, a tela inicial mostra "Abrir checklist" e a meta vira Sim ao marcar todos. Renomear um item faz as semanas antigas o mostrarem como item à parte.</span></label>
       <label class="largura">Cálculo do %<select name="pct_mode">${Object.entries(MODOS).map(([k, t]) => opt(k, t, m.pct_mode)).join('')}</select></label>
       <div class="largura"><label>Dias em que conta</label>
         <div class="dias-sel">${NOMES_DIAS.map((n, d) => `<button type="button" data-dow="${d}" class="${m.weekdays.includes(d) ? 'sel' : ''}">${n}</button>`).join('')}</div>
@@ -133,6 +136,8 @@ $('#lista-metas').addEventListener('submit', async ev => {
   } else {
     Object.assign(dados, { success_value: f.success_value.value === 'true', default_value: bool(f.default_value.value),
                            feeling_on: bool(f.feeling_on.value), target: null });
+    const itens = [...new Set(f.checklist.value.split('\n').map(t => t.trim()).filter(Boolean))];
+    dados.checklist = itens.length ? itens : null;
   }
   const { error } = await sb.from('goals').update(dados).eq('id', id);
   if (error) return alert('Não consegui salvar: ' + (error.code === '23505' ? 'já existe uma meta com esse nome.' : error.message));

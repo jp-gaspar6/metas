@@ -42,6 +42,10 @@ button:active { transform: scale(.96); }
 input, textarea, select { font: inherit; color: var(--texto); background: var(--cartao-2);
   border: 1px solid var(--borda); border-radius: 14px; padding: 12px; outline: none; }
 input:focus, textarea:focus, select:focus { border-color: var(--primaria); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primaria) 20%, transparent); }
+/* Caixas de marcar: sem o padding e o anel de foco dos campos de texto (deixava um quadrado roxo deslocado) */
+input[type=checkbox] { padding: 0; border-radius: 4px; }
+input[type=checkbox]:focus { box-shadow: none; }
+input[type=checkbox]:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
 
 /* ---------- Topo ---------- */
 .topo { display: flex; align-items: center; gap: 6px; padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top));
@@ -153,6 +157,7 @@ main.largo { max-width: 1100px; }
 
 .stepper { display: flex; align-items: center; gap: 10px; }
 .stepper button { width: 52px; height: 52px; border-radius: 50%; border: 0; font-size: 26px; font-weight: 600; line-height: 1;
+  display: grid; place-items: center; padding: 0;
   background: color-mix(in srgb, var(--cor) 14%, transparent); color: var(--cor); }
 .stepper button[data-acao="mais"] { background: var(--cor); color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--cor) 40%, transparent); }
 .valor { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }

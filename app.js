@@ -335,12 +335,12 @@ function renderHoje(trocouDia) {
       alvo = `meta ${num(m.target)} ${m.unit || ''} · ${textoDias(m.weekdays)}`;
       const fracao = Math.min(1, (Number(e.num_value) || 0) / Number(m.target)) * 100;
       corpo = `<div class="stepper">
-          <button data-acao="menos" aria-label="Menos">−</button>
+          <button data-acao="menos" aria-label="Menos"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
           <div class="valor">
             <input type="number" inputmode="decimal" min="0" step="${m.step || 1}" value="${e.num_value ?? ''}" placeholder="0" data-acao="digitar" aria-label="${m.name}">
             <span class="unid">${m.unit || ''}</span>
           </div>
-          <button data-acao="mais" aria-label="Mais">+</button>
+          <button data-acao="mais" aria-label="Mais"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
         <div class="barra"><i style="width:${fracao}%"></i></div>`;
     } else {
@@ -453,8 +453,10 @@ function checksAtuais() {
   return { ok: [...(c.ok || [])], obs: { ...(c.obs || {}) } };
 }
 function renderChecklist() {
-  const c = checksAtuais(), itens = ck.meta.checklist;
-  $('#ck-conta').textContent = `${itens.filter(t => c.ok.includes(t)).length}/${itens.length} · ${ddmm(ck.dia)}`;
+  const c = checksAtuais();
+  // Itens antigos (renomeados/removidos) que foram marcados ou comentados naquela semana aparecem no fim
+  const itens = ck.itens = [...new Set([...ck.meta.checklist, ...c.ok, ...Object.keys(c.obs)])];
+  $('#ck-conta').textContent = `${ck.meta.checklist.filter(t => c.ok.includes(t)).length}/${ck.meta.checklist.length} · ${ddmm(ck.dia)}`;
   $('#ck-itens').innerHTML = itens.map((t, i) => {
     const feito = c.ok.includes(t), obs = c.obs[t] || '';
     return `<div class="ck-item ${feito ? 'feito' : ''}" data-i="${i}">
@@ -472,7 +474,7 @@ function gravarChecks(c) {
 }
 $('#ck-itens').addEventListener('change', ev => {
   if (ev.target.type !== 'checkbox') return;
-  const t = ck.meta.checklist[ev.target.closest('.ck-item').dataset.i];
+  const t = ck.itens[ev.target.closest('.ck-item').dataset.i];
   const c = checksAtuais();
   c.ok = c.ok.filter(x => x !== t);
   if (ev.target.checked) c.ok.push(t);
@@ -483,7 +485,7 @@ $('#ck-itens').addEventListener('change', ev => {
 $('#ck-itens').addEventListener('input', ev => {
   if (!ev.target.classList.contains('ck-obs')) return;
   const item = ev.target.closest('.ck-item');
-  const t = ck.meta.checklist[item.dataset.i];
+  const t = ck.itens[item.dataset.i];
   const c = checksAtuais();
   if (ev.target.value.trim()) c.obs[t] = ev.target.value; else delete c.obs[t];
   gravarChecks(c);
