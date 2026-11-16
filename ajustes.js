@@ -28,7 +28,7 @@ function formMeta(m, i) {
     <summary>
       <div class="icone-meta">${icone}</div>
       <div class="card-tit"><span class="card-nome">${esc(m.name)}${m.active ? '' : ' (arquivada)'}</span>
-        <span class="card-alvo">${numerica ? `alvo ${num(m.target)} ${esc(m.unit || '')}` : 'sim/não'} · ${textoDias(m.weekdays)}</span></div>
+        <span class="card-alvo">${numerica ? `alvo ${num(m.target)} ${esc(m.unit || '')}` : (m.checklist?.length ? `checklist de ${m.checklist.length} itens` : 'sim/não')} · ${textoDias(m.weekdays)}</span></div>
       <div class="ordem"><button data-mover="-1" title="Subir">▲</button><button data-mover="1" title="Descer">▼</button></div>
     </summary>
     <form class="form-meta" data-tipo="${m.kind}">
