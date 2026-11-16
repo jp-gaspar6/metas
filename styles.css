@@ -45,7 +45,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--primaria); box-s
 /* Caixas de marcar: sem o padding e o anel de foco dos campos de texto (deixava um quadrado roxo deslocado) */
 input[type=checkbox] { padding: 0; border-radius: 4px; }
 input[type=checkbox]:focus { box-shadow: none; }
-input[type=checkbox]:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
+input[type=checkbox]:focus, input[type=checkbox]:focus-visible { outline: none; }
 
 /* ---------- Topo ---------- */
 .topo { display: flex; align-items: center; gap: 6px; padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top));
