@@ -107,8 +107,8 @@ main.largo { max-width: 1100px; }
 .ck-com { width: 36px; height: 36px; flex: none; background: transparent; border-color: transparent; font-size: 17px; opacity: .45; }
 .ck-com.tem { opacity: 1; }
 .ck-obs { width: 100%; margin: 4px 0 4px 34px; width: calc(100% - 34px); font-size: 14px; }
-.btn-checklist { width: 100%; font-weight: 600; color: var(--texto); border-color: var(--borda);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--primaria) 45%, transparent) var(--p), color-mix(in srgb, var(--texto) 6%, transparent) var(--p)); }
+.btn-checklist { width: 100%; height: 52px; border-radius: 16px; border: 1.5px solid var(--borda); font-weight: 700; font-size: 16px; color: var(--texto);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--primaria) 45%, var(--cartao-2)) var(--p), var(--cartao-2) var(--p)); }
 .cal-topo { display: flex; align-items: center; justify-content: space-between; }
 .cal-topo strong { display: inline-block; }
 .cal-topo strong::first-letter { text-transform: uppercase; }
