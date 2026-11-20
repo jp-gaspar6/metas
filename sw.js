@@ -3,7 +3,7 @@
 // internet. Os DADOS nÃ£o passam por aqui (ficam no Supabase + fila local).
 // Ao mudar qualquer arquivo do app, aumente a VERSAO para forÃ§ar atualizaÃ§Ã£o.
 // =====================================================================
-const VERSAO = 'metas-v48';
+const VERSAO = 'metas-v59';
 const ARQUIVOS = [
   './', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js', 'ideias.js', 'notas.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',
@@ -13,7 +13,7 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener('install', ev => {
-  ev.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  ev.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, { cache: 'reload' })))  /* ignora o cache HTTP: pega sempre a versão nova */).then(() => self.skipWaiting()));
 });
 
 // Apaga caches de versÃµes antigas

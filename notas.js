@@ -215,13 +215,17 @@ function abrirNota(n, kind) {
   if (notaNova) (kind === 'list' ? $('#ne-itens input.ne-txt') : $('#ne-corpo')).focus();
 }
 
+const svgIco = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICO_TEXTO = svgIco('<path d="M4 6h16M4 12h16M4 18h16"/>');
+const ICO_LISTA = svgIco('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>');
+
 function renderEditor() {
   const n = editando, lista = n.kind === 'list';
   $('#ne-corpo').hidden = lista;
   $('#ne-itens').hidden = !lista;
   $('#ne-fixar').classList.toggle('sel', n.pinned);
   $('#ne-fixar').setAttribute('aria-pressed', n.pinned);
-  $('#ne-tipo').textContent = lista ? '≡' : '☑';
+  $('#ne-tipo').innerHTML = lista ? ICO_TEXTO : ICO_LISTA;
   $('#ne-tipo').setAttribute('aria-label', lista ? 'Virar texto' : 'Virar lista');
   $('#ne-arquivar').setAttribute('aria-label', n.archived ? 'Desarquivar' : 'Arquivar');
   $('#ne-arquivar').classList.toggle('sel', n.archived);

@@ -133,3 +133,7 @@ alter table ideas add column if not exists kind text;
 
 -- Meta excluída: some do app, mas os registros ficam guardados
 alter table goals add column if not exists removed boolean not null default false;
+
+-- Checklist de uma meta (itens) e o que foi marcado/comentado em cada dia
+alter table goals   add column if not exists checklist jsonb;
+alter table entries add column if not exists checks   jsonb;
