@@ -76,10 +76,22 @@ $('#btn-sair').onclick = async () => { localStorage.removeItem('ultimo_user'); a
 
 // true enquanto o usuário define a senha pelo link do e-mail (recuperação ou convite)
 let modoSenha = /type=invite/.test(location.hash);
+let authRespondeu = false;
+// Abre na hora com a cópia local quando não há rede (ou a rede não responde em 4 s),
+// sem esperar o login tentar renovar a sessão, o que pode demorar muito sem internet
+{
+  const ultimo = lerLocal('ultimo_user', null);
+  if (ultimo && !modoSenha) {
+    if (!navigator.onLine) entrar(ultimo, true);
+    else setTimeout(() => { if (!estado.user && !authRespondeu) entrar(ultimo, true); }, 4000);
+  }
+}
 sb.auth.onAuthStateChange((ev, sessao) => {
   const u = sessao && sessao.user;
+  authRespondeu = true;
   if (ev === 'PASSWORD_RECOVERY') modoSenha = true;
-  if (u && (!estado.user || estado.user.id !== u.id)) entrar(u);
+  if (u && estado.local && estado.user.id === u.id) { estado.local = false; carregar().then(() => estado.aba === 'hoje' && renderHoje(true)); sincronizar(); }
+  else if (u && (!estado.user || estado.user.id !== u.id)) entrar(u);
   else if (!u && ev !== 'SIGNED_OUT' && !navigator.onLine && lerLocal('ultimo_user', null)) {
     // Sem internet o login expirado não renova: abre com a cópia local e renova quando a rede voltar
     if (!estado.user) entrar(lerLocal('ultimo_user', null));
@@ -87,21 +99,22 @@ sb.auth.onAuthStateChange((ev, sessao) => {
   if (modoSenha && u) mostrarTela('senha');
 });
 
-async function entrar(user) {
+async function entrar(user, local = false) {
   estado.user = user;
+  estado.local = local;
   fila = lerLocal('fila_' + user.id, {});
   $('#btn-sair').hidden = false;
   $('#abas').hidden = false;
   status('carregando…');
   // Leitor: conta convidada que só vê os dados do dono (sem OBS, sem editar)
   gravarLocal('ultimo_user', { id: user.id, email: user.email });
-  const { data: vinculo, error: erroVinculo } = await sb.from('viewers').select('owner_id').eq('viewer_id', user.id).limit(1);
+  const { data: vinculo, error: erroVinculo } = local ? { error: true } : await sb.from('viewers').select('owner_id').eq('viewer_id', user.id).limit(1);
   estado.leitor = erroVinculo ? lerLocal('leitor_' + user.id, false) : !!(vinculo && vinculo.length);
   gravarLocal('leitor_' + user.id, estado.leitor);
   document.body.classList.toggle('leitor', estado.leitor);
   if (estado.leitor) fila = {};
-  await carregar();
-  if (navigator.onLine && !estado.metas.length && !estado.leitor) { await semear(); await carregar(); }
+  await carregar(local);
+  if (!local && navigator.onLine && !estado.metas.length && !estado.leitor) { await semear(); await carregar(); }
   if (estado.leitor) status('só leitura');
   mostrarTela(modoSenha ? 'senha' : 'hoje');
   sincronizar();
@@ -121,10 +134,11 @@ async function buscarTudo(tabela) {
   }
 }
 
-async function carregar() {
+async function carregar(local = false) {
   const chave = 'cache_' + estado.user.id;
   let dados;
   try {
+    if (local) throw new Error('modo local');
     const [metas, entries, notas, listas, ideias, anot] = await Promise.all(
       ['goals', 'entries', 'day_notes', 'lists', 'ideas', 'notes'].map(buscarTudo));
     dados = { metas, entries, notas, listas, ideias, anot };
