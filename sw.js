@@ -1,9 +1,9 @@
-﻿// =====================================================================
+// =====================================================================
 // sw.js â€” service worker: guarda os arquivos do app para abrir sem
 // internet. Os DADOS nÃ£o passam por aqui (ficam no Supabase + fila local).
 // Ao mudar qualquer arquivo do app, aumente a VERSAO para forÃ§ar atualizaÃ§Ã£o.
 // =====================================================================
-const VERSAO = 'metas-v59';
+const VERSAO = 'metas-v60';
 const ARQUIVOS = [
   './', 'styles.css', 'config.js', 'calc.js', 'seed.js', 'app.js', 'graficos.js', 'ajustes.js', 'ideias.js', 'notas.js',
   'manifest.webmanifest', 'icones/icone-192.png', 'icones/icone-512.png', 'icones/apple-touch-icon.png',
@@ -13,7 +13,12 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener('install', ev => {
-  ev.waitUntil(caches.open(VERSAO).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, { cache: 'reload' })))  /* ignora o cache HTTP: pega sempre a versão nova */).then(() => self.skipWaiting()));
+  // Arquivos locais são obrigatórios; os do CDN são tentados um a um (se um falhar, não impede o app de funcionar offline)
+  const req = u => new Request(u, { cache: 'reload' });
+  const locais = ARQUIVOS.filter(u => !u.startsWith('http')), cdn = ARQUIVOS.filter(u => u.startsWith('http'));
+  ev.waitUntil(caches.open(VERSAO).then(c => c.addAll(locais.map(req))
+    .then(() => Promise.all(cdn.map(u => c.add(req(u)).catch(() => {})))))
+    .then(() => self.skipWaiting()));
 });
 
 // Apaga caches de versÃµes antigas
@@ -42,5 +47,8 @@ self.addEventListener('fetch', ev => {
     return;
   }
   // Bibliotecas do CDN tÃªm versÃ£o fixa: cache primeiro
-  ev.respondWith(caches.match(req).then(r => r || fetch(req)));
+  ev.respondWith(caches.match(req).then(r => r || fetch(req).then(resp => {
+    if (resp.ok) { const copia = resp.clone(); caches.open(VERSAO).then(c => c.put(req, copia)); }
+    return resp;
+  })));
 });
